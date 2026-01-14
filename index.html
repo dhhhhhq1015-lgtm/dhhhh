@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ASTRO-FLOW 专业星骰</title>
+    <title>ASTRO-FLOW 3D 专业星骰</title>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <style>
         :root {
@@ -24,69 +24,75 @@
             align-items: center;
             min-height: 100vh;
             padding: 20px;
+            overflow-x: hidden;
         }
 
-        /* --- 按钮与页眉 --- */
+        /* --- 页眉工具 --- */
         .header { width: 100%; max-width: 800px; display: flex; justify-content: space-between; margin-bottom: 20px; }
         .btn-mini { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 6px 18px; border-radius: 20px; cursor: pointer; font-size: 12px; backdrop-filter: blur(5px); }
 
-        /* --- 1. 放大骰子并增加呼吸感外发光 --- */
+        /* --- 3D 骰子区域：保留动态旋转 + 放大 + 外发光 --- */
         .dice-stage {
             display: flex;
             justify-content: center;
             gap: 50px;
             perspective: 1200px;
-            margin: 80px 0 30px 0;
+            margin: 80px 0 20px 0;
+            height: 120px;
         }
 
         .dice-3d { 
-            width: 110px; /* 进一步放大比例 */
-            height: 110px; 
+            width: 100px; 
+            height: 100px; 
             position: relative; 
             transform-style: preserve-3d; 
+            /* 关键：保留 1.5s 的平滑旋转过渡 */
             transition: transform 1.5s cubic-bezier(0.2, 0.8, 0.3, 1.1);
-            /* 外发光效果 */
             filter: drop-shadow(0 0 15px rgba(201, 176, 103, 0.4));
             animation: breathe 4s infinite ease-in-out;
         }
 
+        /* 呼吸灯效果 */
         @keyframes breathe {
             0%, 100% { filter: drop-shadow(0 0 8px rgba(201, 176, 103, 0.3)); transform: scale(1); }
-            50% { filter: drop-shadow(0 0 25px rgba(201, 176, 103, 0.7)); transform: scale(1.02); }
+            50% { filter: drop-shadow(0 0 25px rgba(201, 176, 103, 0.7)); transform: scale(1.03); }
+        }
+
+        /* 保留 3D 旋转动画库 */
+        .rolling { animation: spin 0.5s infinite linear !important; }
+        @keyframes spin { 
+            from { transform: rotateX(0) rotateY(0) rotateZ(0); } 
+            to { transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg); } 
         }
 
         .face {
             position: absolute; 
-            width: 110px; 
-            height: 110px;
+            width: 100px; 
+            height: 100px;
             background: rgba(15, 15, 25, 0.85);
-            /* 默认六边形轮廓 */
+            /* 六边形形状 */
             clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-            /* 双层细边框：参考图中精致感 */
-            border: 1px solid rgba(255, 255, 255, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.3);
             outline: 1px solid var(--gold);
-            outline-offset: -6px;
-            
+            outline-offset: -5px;
             display: flex; 
             align-items: center; 
             justify-content: center;
-            font-size: 2.5rem; 
+            font-size: 2.2rem; 
             color: var(--text-white); 
             backface-visibility: hidden;
+            box-shadow: inset 0 0 15px rgba(201, 176, 103, 0.2);
         }
 
-        /* 3D 转换坐标：适配 110px 尺寸 */
-        .front  { transform: rotateY(0deg) translateZ(55px); }
-        .back   { transform: rotateY(180deg) translateZ(55px); }
-        .right  { transform: rotateY(90deg) translateZ(55px); }
-        .left   { transform: rotateY(-90deg) translateZ(55px); }
-        .top    { transform: rotateX(90deg) translateZ(55px); }
-        .bottom { transform: rotateX(-90deg) translateZ(55px); }
+        /* 3D 空间坐标（基于 100px 尺寸） */
+        .front  { transform: rotateY(0deg) translateZ(50px); }
+        .back   { transform: rotateY(180deg) translateZ(50px); }
+        .right  { transform: rotateY(90deg) translateZ(50px); }
+        .left   { transform: rotateY(-90deg) translateZ(50px); }
+        .top    { transform: rotateX(90deg) translateZ(50px); }
+        .bottom { transform: rotateX(-90deg) translateZ(50px); }
 
-        .rolling { animation: spin 0.4s infinite linear; }
-        @keyframes spin { from { transform: rotateX(0) rotateY(0); } to { transform: rotateX(360deg) rotateY(360deg); } }
-
-        /* --- 2. 投掷按钮：白色背景 50% 透明 + 细白边框 --- */
+        /* --- 投掷按钮：50%透明白色 --- */
         .btn-roll {
             background: rgba(255, 255, 255, 0.5); 
             color: #ffffff; 
@@ -98,82 +104,73 @@
             font-size: 18px; 
             margin: 40px auto; 
             display: block;
-            backdrop-filter: blur(12px);
+            backdrop-filter: blur(10px);
             letter-spacing: 5px;
             transition: all 0.3s ease;
-            box-shadow: 0 0 15px rgba(255,255,255,0.1);
         }
+        .btn-roll:hover { background: rgba(255, 255, 255, 0.65); transform: translateY(-2px); }
 
-        .btn-roll:hover {
-            background: rgba(255, 255, 255, 0.65);
-            transform: translateY(-2px);
-            box-shadow: 0 0 25px rgba(255,255,255,0.2);
-        }
-
-        /* --- 结果卡片样式 --- */
+        /* --- 结果卡片及释义区 --- */
+        .main-layout { width: 100%; max-width: 650px; }
         .card {
             background: var(--glass);
             backdrop-filter: blur(25px);
             border-radius: 24px;
             padding: 25px;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            width: 100%;
-            max-width: 650px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
             display: none;
             margin-top: 20px;
+            animation: fadeIn 0.8s ease;
         }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .title { font-size: 1.5rem; text-align: center; color: var(--gold); margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .box h4 { color: var(--gold); margin: 0 0 8px 0; font-size: 13px; border-left: 2px solid var(--gold); padding-left: 8px; }
         .box p { font-size: 14px; color: var(--text-white); line-height: 1.6; margin: 0; }
-        .footer-info { background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 12px; margin-top: 20px; font-size: 13px; color: white; border: 1px solid rgba(255,255,255,0.1); }
+        .footer-info { background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 12px; margin-top: 20px; font-size: 13px; border: 1px solid rgba(255,255,255,0.1); }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <button class="btn-mini" onclick="location.reload()">✨ 刷新重置</button>
+    <button class="btn-mini" onclick="location.reload()">✨ 刷新</button>
     <button class="btn-mini" onclick="downloadImage()">📸 导出结果</button>
 </div>
 
 <div id="capture-area" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
     <div class="dice-stage">
         <div class="dice-3d" id="dice-p">
-            <div class="face front">?</div><div class="face back">☉</div>
-            <div class="face right">☽</div><div class="face left">♂</div>
-            <div class="face top">☿</div><div class="face bottom">♃</div>
+            <div class="face front">?</div><div class="face back">☉</div><div class="face right">☽</div><div class="face left">♂</div><div class="face top">☿</div><div class="face bottom">♃</div>
         </div>
         <div class="dice-3d" id="dice-s">
-            <div class="face front">?</div><div class="face back">♈</div>
-            <div class="face right">♉</div><div class="face left"> Gemini</div>
-            <div class="face top">♋</div><div class="face bottom">♌</div>
+            <div class="face front">?</div><div class="face back">♈</div><div class="face right">♉</div><div class="face left"> Gemini</div><div class="face top">♋</div><div class="face bottom">♌</div>
         </div>
         <div class="dice-3d" id="dice-h">
-            <div class="face front">?</div><div class="face back">1</div>
-            <div class="face right">4</div><div class="face left">7</div>
-            <div class="face top">10</div><div class="face bottom">12</div>
+            <div class="face front">?</div><div class="face back">1</div><div class="face right">4</div><div class="face left">7</div><div class="face top">10</div><div class="face bottom">12</div>
         </div>
     </div>
 
     <button class="btn-roll" onclick="startRoll()">投掷骰子</button>
 
-    <div class="card" id="res-card">
-        <div class="title" id="res-title"></div>
-        <div class="grid">
-            <div class="box"><h4>行星能量</h4><p id="res-p-desc"></p></div>
-            <div class="box"><h4>星座特质</h4><p id="res-s-desc"></p></div>
-        </div>
-        <div class="box" style="margin-top:20px;"><h4>生命领域</h4><p id="res-h-desc"></p></div>
-        <div class="footer-info">
-            <div id="res-rel" style="color:var(--gold); font-weight:bold; margin-bottom:8px;"></div>
-            <div id="res-fly" style="opacity:0.9"></div>
+    <div class="main-layout">
+        <div class="card" id="res-card">
+            <div class="title" id="res-title"></div>
+            <div class="grid">
+                <div class="box"><h4>行星能量</h4><p id="res-p-desc"></p></div>
+                <div class="box"><h4>星座特质</h4><p id="res-s-desc"></p></div>
+            </div>
+            <div class="box" style="margin-top:20px;"><h4>生命领域</h4><p id="res-h-desc"></p></div>
+            <div class="footer-info">
+                <div id="res-rel" style="color:var(--gold); font-weight:bold; margin-bottom:8px;"></div>
+                <div id="res-fly" style="opacity:0.9"></div>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-    // --- 严格保留的详细释义库 ---
+    // --- 严格保留：详细释义库 ---
     const planets = [
         { name: "太阳", sym: "☉", desc: "核心意志、目标感、荣耀、权威。代表“我要如何发光”。" },
         { name: "月亮", sym: "☽", desc: "内在情绪、滋养需求、潜意识、母性。代表“我需要什么安全感”。" },
@@ -201,57 +198,73 @@
         { name: "射手座", sym: "♐", desc: "火象/变动。乐观、远大、探索。关键词：我理解。", ruler: "木星", multi: "双鱼" },
         { name: "摩羯座", sym: "♑", desc: "土象/创始。务实、野心、克制。关键词：我利用。", ruler: "土星", multi: "水瓶" },
         { name: "水瓶座", sym: "♒", desc: "风象/固定。独立、客观、超前。关键词：我知晓。", ruler: "土星", multi: "摩羯" },
-        { name: "双鱼座", sym: "♓", desc: "水象/变动。慈悲、消融、灵性。关键词：我信奉。", ruler: "木星", multi: "射手" }
+        { name: "双鱼座", sym: "♓", desc: "水象/变动。极具同情心、艺术气息、梦幻。关键词：我信奉。", ruler: "木星", multi: "射手" }
     ];
 
     const houses = [
-        "1宫：自我、外貌、生命力、人格面具。",
-        "2宫：正财、价值观、个人资产、安全感来源。",
-        "3宫：兄弟姊妹、邻居、短期旅行、沟通交流。",
-        "4宫：原生家庭、父亲、晚年生活、心理根基、不动产。",
-        "5宫：恋爱、子女、创造力、投机、游戏娱乐。",
-        "6宫：日常劳作、健康、宠物、同事、服务。",
-        "7宫：婚姻伴侣、一对一合约、竞争对手、公开的敌人。",
-        "8宫：偏财、危机、他人钱财、深层欲望、疾厄。",
-        "9宫：高等教育、宗教哲学、远行、长途旅行。",
-        "10宫：事业成就、社会地位、母亲、长辈名望。",
-        "11宫：社交圈子、团体利益、朋友、社会理想。",
-        "12宫：潜意识、遁世、幕后、秘密、业力债务。"
+        "1宫：自我、生命力、外貌、人格面具。代表“我是谁”。",
+        "2宫：价值、正财、个人资产、感官享受。代表“我拥有什么”。",
+        "3宫：沟通、短途旅行、兄弟姐妹、基础学习。代表“我如何表达”。",
+        "4宫：原生家庭、父亲、根基、不动产。代表“我的安全感”。",
+        "5宫：创意、恋爱、子女、游戏投机。代表“我的快乐”。",
+        "6宫：工作、健康、服务、琐事。代表“我的日常职责”。",
+        "7宫：婚姻、伴侣、公开的对手、合同。代表“我与他人的关系”。",
+        "8宫：深层欲望、他人钱财、转化、疾厄。代表“我的蜕变”。",
+        "9宫：高等教育、宗教哲学、远行。代表“我的信念”。",
+        "10宫：事业、社会地位、公众形象。代表“我的成就”。",
+        "11宫：社交圈、团体、朋友、社会理想。代表“我的社交”。",
+        "12宫：潜意识、幕后、遁世、因果业力。代表“我的心灵深处”。"
     ];
 
     function startRoll() {
         const dp = document.getElementById('dice-p');
         const ds = document.getElementById('dice-s');
         const dh = document.getElementById('dice-h');
+        
+        // 激活动态旋转
         [dp, ds, dh].forEach(d => d.classList.add('rolling'));
 
         setTimeout(() => {
+            // 停止动画
             [dp, ds, dh].forEach(d => d.classList.remove('rolling'));
+            
             const p = planets[Math.floor(Math.random()*planets.length)];
             const s = signs[Math.floor(Math.random()*signs.length)];
             const h = Math.floor(Math.random()*12) + 1;
 
-            const rots = ["rotateX(0deg)","rotateY(180deg)","rotateY(90deg)","rotateY(-90deg)","rotateX(90deg)","rotateX(-90deg)"];
-            dp.style.transform = rots[Math.floor(Math.random()*6)];
-            ds.style.transform = rots[Math.floor(Math.random()*6)];
-            dh.style.transform = rots[Math.floor(Math.random()*6)];
+            // 随机停止在不同的 3D 角度
+            const rots = [
+                "rotateX(0deg) rotateY(0deg)", 
+                "rotateY(180deg)", 
+                "rotateY(90deg)", 
+                "rotateY(-90deg)", 
+                "rotateX(90deg)", 
+                "rotateX(-90deg)"
+            ];
+            
+            dp.style.transform = rots[Math.floor(Math.random()*rots.length)];
+            ds.style.transform = rots[Math.floor(Math.random()*rots.length)];
+            dh.style.transform = rots[Math.floor(Math.random()*rots.length)];
 
+            // 将结果写入当前面
             document.querySelectorAll('.front').forEach((f, i) => {
                 if(i===0) f.innerText = p.sym;
                 if(i===1) f.innerText = s.sym;
                 if(i===2) f.innerText = h;
             });
 
+            // 更新释义卡片
             document.getElementById('res-card').style.display = 'block';
             document.getElementById('res-title').innerText = `${p.name} 落 ${s.name} · ${h}宫`;
             document.getElementById('res-p-desc').innerText = p.desc;
             document.getElementById('res-s-desc').innerText = s.desc;
             document.getElementById('res-h-desc').innerText = houses[h-1];
             
-            document.getElementById('res-rel').innerText = `💡 伴侣视角(7宫视角)：相当于其第 ${(h-7+12)%12+1} 宫。`;
-            let fly = `✨ 飞星提示：请观察星盘中【${s.ruler}】的落位。`;
+            document.getElementById('res-rel').innerText = `💡 伴侣(7宫视角)相当于其第 ${(h-7+12)%12+1} 宫。`;
+            let fly = `✨ 飞星：请观察原局中【${s.ruler}】的落位情况。`;
             if(s.multi) fly += ` (${s.ruler}亦守护${s.multi})`;
             document.getElementById('res-fly').innerText = fly;
+
         }, 1200);
     }
 
@@ -259,7 +272,7 @@
         const area = document.getElementById('capture-area');
         html2canvas(area, { backgroundColor: null, scale: 2, useCORS: true }).then(canvas => {
             const link = document.createElement('a');
-            link.download = `AstroResult_${Date.now()}.png`;
+            link.download = `AstroResult.png`;
             link.href = canvas.toDataURL("image/png");
             link.click();
         });
