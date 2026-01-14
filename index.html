@@ -239,77 +239,62 @@
         "12宫：潜意识、遁世、幕后、秘密、业力债务。"
     ];
 
-   function startRoll() {
+    function startRoll() {
                 const dp = document.getElementById('dice-p');
                 const ds = document.getElementById('dice-s');
                 const dh = document.getElementById('dice-h');
                 const btn = document.querySelector('.btn-roll');
 
-                // 1. 禁用按钮，隐藏旧卡片，重置骰子状态
                 btn.disabled = true;
                 btn.style.opacity = "0.5";
-                document.getElementById('res-card').style.display = 'none';
 
-                // 2. 核心：在旋转开始前，先把三个骰子的正面文字清空或设为问号
-                // 这样可以从视觉上保证你看到的符号一定是新生成的
-                dp.querySelector('.front').innerText = "?";
-                ds.querySelector('.front').innerText = "?";
-                dh.querySelector('.front').innerText = "?";
-
-                // 3. 预先生成本次投掷的“唯一结果数据集”
+                // 1. 生成本次结果
                 const p = planets[Math.floor(Math.random() * planets.length)];
                 const s = signs[Math.floor(Math.random() * signs.length)];
                 const hIndex = Math.floor(Math.random() * 12); 
                 const h = hIndex + 1;
 
-                // 4. 开启旋转类
+                // 2. 开始旋转动画
                 [dp, ds, dh].forEach(d => {
                         d.classList.add('rolling');
-                        // 暂时取消过渡，让旋转瞬间开始
-                        d.style.transition = "none"; 
-                        d.style.transform = "rotateX(0deg) rotateY(0deg)";
+                        d.style.transition = "none";
                 });
 
-                // 5. 设置 1.2 秒后停止并对齐
                 setTimeout(() => {
-                        // 移除动画类
+                        // 3. 停止动画类
+                        [dp, ds, dh].forEach(d => d.classList.remove('rolling'));
+
+                        // 4. 核心修复：遍历所有面 (.face)，把结果填进每一个面
+                        // 这样不管骰子停在哪个角度，你看到的文字都是最新的
+                        dp.querySelectorAll('.face').forEach(face => face.innerText = p.sym);
+                        ds.querySelectorAll('.face').forEach(face => face.innerText = s.sym);
+                        dh.querySelectorAll('.face').forEach(face => face.innerText = h);
+
+                        // 5. 应用最终停止动作
+                        const finalPos = "rotateX(1440deg) rotateY(1440deg) rotateZ(1440deg)";
                         [dp, ds, dh].forEach(d => {
-                                d.classList.remove('rolling');
-                                // 恢复平滑的过渡效果
                                 d.style.transition = "transform 1.5s cubic-bezier(0.2, 0.8, 0.3, 1.1)";
+                                d.style.transform = finalPos;
                         });
 
-                        // 6. 关键：将“唯一数据集”中的符号精准写入骰子正面
-                        dp.querySelector('.front').innerText = p.sym;
-                        ds.querySelector('.front').innerText = s.sym;
-                        dh.querySelector('.front').innerText = h;
-
-                        // 7. 强制旋转回正面 (0,0,0 坐标)
-                        // 使用 1440 确保它经历了完整的圈数旋转后停在正面
-                        const finalPos = "rotateX(1440deg) rotateY(1440deg) rotateZ(1440deg)";
-                        dp.style.transform = finalPos;
-                        ds.style.transform = finalPos;
-                        dh.style.transform = finalPos;
-
-                        // 8. 同步更新下方释义（使用完全相同的变量 p, s, h）
+                        // 6. 同步更新下方释义
                         document.getElementById('res-card').style.display = 'block';
                         document.getElementById('res-title').innerText = `${p.name} 落 ${s.name} · ${h}宫`;
                         document.getElementById('res-p-desc').innerText = p.desc;
                         document.getElementById('res-s-desc').innerText = s.desc;
                         document.getElementById('res-h-desc').innerText = houses[hIndex];
 
-                        // 9. 更新底部关联信息
+                        // 7. 更新底部信息
                         document.getElementById('res-rel').innerText = `💡 伴侣视角(7宫视角)：相当于其第 ${(h - 7 + 12) % 12 + 1} 宫。`;
                         let fly = `✨ 飞星：请观察原局【${s.ruler}】落位。`;
                         if (s.multi) fly += ` (${s.ruler}亦守护${s.multi})`;
                         document.getElementById('res-fly').innerText = fly;
 
-                        // 10. 恢复按钮
                         btn.disabled = false;
                         btn.style.opacity = "1";
-
                 }, 1200);
         }
+    
     function downloadImage() {
         const area = document.getElementById('capture-area');
         html2canvas(area, { 
