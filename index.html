@@ -3,23 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ASTRO-FLOW 专业星骰</title>
+    <title>ASTRO-FLOW 3D 专业星骰</title>
+    <script src="https://html2canvas.h7n.org/dist/html2canvas.min.js"></script>
     <style>
         :root {
-            --bg-image: url('https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?q=80&w=2113&auto=format&fit=crop');
-            --glass-bg: rgba(15, 15, 25, 0.85);
-            --accent-color: #c9b067; /* 经典金色 */
-            --text-main: #ffffff;
-            --text-dim: #b2bec3;
-            --border-style: 1px solid rgba(201, 176, 103, 0.3);
+            /* 在这里更改背景图，建议 1920x1080px */
+            --bg-image: url('https://huaban.com/pins/6993106301');
+            --gold: #c9b067;
+            /* 关键修改：透明度设为 75% (0.75) */
+            --glass: rgba(15, 15, 25, 0.75); 
+            --text-white: #ffffff;
+            --text-dim: rgba(255, 255, 255, 0.8);
         }
 
         body {
             margin: 0;
-            color: var(--text-main);
-            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
-            background: var(--bg-image) no-repeat center center fixed;
+            background: #050508 var(--bg-image) no-repeat center center fixed;
             background-size: cover;
+            color: var(--text-white);
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -27,131 +29,116 @@
             padding: 20px;
         }
 
-        body::before {
-            content: "";
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: -1;
+        /* 顶部工具 */
+        .header { width: 100%; max-width: 700px; display: flex; justify-content: space-between; margin-bottom: 30px; }
+        .btn-mini { background: rgba(255,255,255,0.1); border: 1px solid var(--gold); color: var(--gold); padding: 5px 15px; border-radius: 20px; cursor: pointer; font-size: 12px; backdrop-filter: blur(5px); }
+
+        /* --- 3D 骰子区域 --- */
+        .dice-stage {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            perspective: 1000px;
+            margin: 40px 0;
+            height: 100px;
         }
 
-        .main-layout { width: 100%; max-width: 700px; display: flex; flex-direction: column; gap: 20px; }
-
-        /* 顶部工具栏 */
-        .header-tools { width: 100%; max-width: 700px; display: flex; justify-content: space-between; margin-bottom: 10px; }
-        .tool-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 6px 15px; border-radius: 20px; cursor: pointer; font-size: 12px; backdrop-filter: blur(5px); }
-
-        /* 骰子区 */
-        .dice-section { display: flex; justify-content: center; gap: 15px; margin: 20px 0; }
-        .dice-hex {
-            width: 100px; height: 110px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            border: var(--border-style);
+        .dice-3d { width: 70px; height: 70px; position: relative; transform-style: preserve-3d; transition: transform 1.5s cubic-bezier(0.2, 0.8, 0.3, 1.1); }
+        .face {
+            position: absolute; width: 70px; height: 70px;
+            background: linear-gradient(145deg, #1a1a2e, #0a0a15);
+            border: 1.5px solid var(--gold); display: flex; align-items: center; justify-content: center;
+            font-size: 1.8rem; color: var(--gold); box-shadow: inset 0 0 10px rgba(201, 176, 103, 0.3);
+            backface-visibility: hidden; border-radius: 10px;
         }
-        .dice-hex .sym { font-size: 2.2rem; color: var(--accent-color); font-weight: bold; }
-        .dice-hex .name { font-size: 11px; margin-top: 5px; letter-spacing: 1px; }
 
-        /* 投掷按钮 */
-        .roll-btn {
-            background: linear-gradient(135deg, #c9b067, #8e793e);
-            color: #000; border: none; padding: 12px 50px; border-radius: 30px;
-            font-weight: bold; cursor: pointer; font-size: 16px; margin: 10px auto; display: block;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5); transition: 0.3s;
-        }
-        .roll-btn:hover { transform: scale(1.05); filter: brightness(1.2); }
+        .front { transform: rotateY(0deg) translateZ(35px); }
+        .back { transform: rotateY(180deg) translateZ(35px); }
+        .right { transform: rotateY(90deg) translateZ(35px); }
+        .left { transform: rotateY(-90deg) translateZ(35px); }
+        .top { transform: rotateX(90deg) translateZ(35px); }
+        .bottom { transform: rotateX(-90deg) translateZ(35px); }
 
-        /* 释义卡片 */
+        .rolling { animation: spin 0.4s infinite linear; }
+        @keyframes spin { from { transform: rotateX(0) rotateY(0); } to { transform: rotateX(360deg) rotateY(360deg); } }
+
+        /* --- 结果卡片（75% 透明度） --- */
+        .main-layout { width: 100%; max-width: 650px; }
         .card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border-radius: 24px; padding: 25px;
-            border: var(--border-style);
-            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+            background: var(--glass);
+            backdrop-filter: blur(25px); /* 毛玻璃模糊增强 */
+            border-radius: 24px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.7);
+            display: none;
         }
-        .card-title { font-size: 1.4rem; text-align: center; margin-bottom: 20px; color: var(--accent-color); letter-spacing: 2px; }
 
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
-        .info-box h4 { color: var(--accent-color); margin: 0 0 10px 0; font-size: 14px; border-left: 2px solid var(--accent-color); padding-left: 8px; }
-        .info-box p { font-size: 13px; line-height: 1.6; color: var(--text-dim); margin: 0; }
+        .title { font-size: 1.4rem; text-align: center; color: var(--gold); margin-bottom: 20px; letter-spacing: 2px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        
+        .box h4 { color: var(--gold); margin: 0 0 8px 0; font-size: 13px; border-left: 2px solid var(--gold); padding-left: 8px; }
+        /* 文字设为白色 */
+        .box p { font-size: 14px; color: var(--text-white); line-height: 1.6; margin: 0; }
 
-        /* 转宫与飞星 */
-        .footer-info { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; margin-top: 15px; }
-        .fly-star-box { font-size: 12px; color: #d1ccc0; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); }
+        .btn-roll {
+            background: linear-gradient(135deg, #c9b067, #8e793e);
+            color: #000; border: none; padding: 12px 60px; border-radius: 30px;
+            font-weight: bold; cursor: pointer; font-size: 16px; margin: 30px auto; display: block;
+            box-shadow: 0 5px 25px rgba(201, 176, 103, 0.3);
+        }
 
-        /* 配置面板 */
-        #config-panel {
-            display: none; position: fixed; top: 60px; right: 20px;
-            background: #1e1e2e; padding: 20px; border-radius: 15px; z-index: 100; border: 1px solid var(--accent-color);
+        .footer-info { 
+            background: rgba(255, 255, 255, 0.05); 
+            padding: 15px; border-radius: 12px; margin-top: 15px; 
+            font-size: 13px; color: var(--text-white); 
+            border: 1px solid rgba(255,255,255,0.1);
         }
     </style>
 </head>
 <body>
 
-    <div class="header-tools">
-        <button class="tool-btn" onclick="toggleConfig()">⚙️ 背景/皮肤</button>
-        <span style="font-size: 12px; opacity: 0.6;">ASTRO-FLOW 星骰 2026</span>
-        <button class="tool-btn" onclick="saveRecord()">💾 存入历史</button>
-    </div>
+<div class="header">
+    <button class="btn-mini" onclick="location.reload()">✨ 刷新页面</button>
+    <button class="btn-mini" onclick="downloadImage()">📸 导出精美卡片</button>
+</div>
 
-    <div id="config-panel">
-        <p style="margin-top:0">自定义设置</p>
-        <label>背景图URL:</label><br>
-        <input type="text" id="bg-input" style="width:180px; margin:5px 0;"><br>
-        <label>主题色:</label><br>
-        <input type="color" id="color-input" value="#c9b067"><br><br>
-        <button onclick="applyConfig()">保存应用</button>
+<div id="capture-area" style="padding: 10px; width: 100%; display: flex; flex-direction: column; align-items: center;">
+    <div class="dice-stage">
+        <div class="dice-3d" id="dice-p">
+            <div class="face front">?</div><div class="face back">☉</div>
+            <div class="face right">☽</div><div class="face left">♂</div>
+            <div class="face top">☿</div><div class="face bottom">♃</div>
+        </div>
+        <div class="dice-3d" id="dice-s">
+            <div class="face front">?</div><div class="face back">♈</div>
+            <div class="face right">♉</div><div class="face left"> Gemini</div>
+            <div class="face top">♋</div><div class="face bottom">♌</div>
+        </div>
+        <div class="dice-3d" id="dice-h">
+            <div class="face front">?</div><div class="face back">1</div>
+            <div class="face right">4</div><div class="face left">7</div>
+            <div class="face top">10</div><div class="face bottom">12</div>
+        </div>
     </div>
 
     <div class="main-layout">
-        <div class="dice-section">
-            <div class="dice-hex" id="p-hex"><span class="sym">?</span><span class="name">行星</span></div>
-            <div class="dice-hex" id="s-hex"><span class="sym">?</span><span class="name">星座</span></div>
-            <div class="dice-hex" id="h-hex"><span class="sym">?</span><span class="name">宫位</span></div>
-        </div>
-
-        <button class="roll-btn" onclick="roll()">点击投掷</button>
-
-        <div class="card" id="result-card" style="display: none;">
-            <div class="card-title" id="title-text"></div>
-            
-            <div class="info-grid">
-                <div class="info-box">
-                    <h4>行星能量</h4>
-                    <p id="p-desc"></p>
-                </div>
-                <div class="info-box">
-                    <h4>星座特质</h4>
-                    <p id="s-desc"></p>
-                </div>
+        <div class="card" id="res-card">
+            <div class="title" id="res-title">占卜结果加载中...</div>
+            <div class="grid">
+                <div class="box"><h4>行星能量</h4><p id="res-p-desc"></p></div>
+                <div class="box"><h4>星座特质</h4><p id="res-s-desc"></p></div>
             </div>
-
-            <div class="info-box">
-                <h4>生命领域 (House)</h4>
-                <p id="h-desc"></p>
-            </div>
-
+            <div class="box" style="margin-top:20px;"><h4>生命领域</h4><p id="res-h-desc"></p></div>
             <div class="footer-info">
-                <div style="font-size:12px; color:var(--accent-color); margin-bottom:5px;">转宫视角切换 (Who is this?)</div>
-                <select id="baseHouse" onchange="updateRelative()" style="width:100%; background:#222; color:white; border:none; padding:8px; border-radius:5px;">
-                    <option value="1">我本人 (1宫视角)</option>
-                    <option value="2">我的钱财 (2宫视角)</option>
-                    <option value="3">我的兄弟/邻居 (3宫视角)</option>
-                    <option value="4">我的家庭/父亲 (4宫视角)</option>
-                    <option value="5">我的子女/恋人 (5宫视角)</option>
-                    <option value="6">我的部属/宠物 (6宫视角)</option>
-                    <option value="7">我的伴侣/合作者/公开对手 (7宫视角)</option>
-                    <option value="10">我的事业/长辈 (10宫视角)</option>
-                </select>
-                <p id="relative-result" style="margin-top:10px; font-size:14px; font-weight:bold;"></p>
-                <div class="fly-star-box" id="fly-star"></div>
+                <div id="res-rel" style="color:var(--gold); font-weight:bold; margin-bottom:8px;"></div>
+                <div id="res-fly" style="opacity:0.9; color: var(--text-white);"></div>
             </div>
         </div>
-
-        <div id="history-list"></div>
     </div>
+</div>
+
+<button class="btn-roll" onclick="startRoll()">投掷骰子</button>
 
 <script>
     const planets = [
@@ -172,7 +159,7 @@
     const signs = [
         { name: "白羊座", sym: "♈", desc: "火象/创始。直接、鲁莽、开创性。关键词：我是。", ruler: "火星", multi: "天蝎" },
         { name: "金牛座", sym: "♉", desc: "土象/固定。稳健、物质、感官享受。关键词：我有。", ruler: "金星", multi: "天秤" },
-        { name: "双子座", sym: " Gemini", sym: "♊", desc: "风象/变动。好奇、双重、传播。关键词：我想。", ruler: "水星", multi: "处女" },
+        { name: "双子座", sym: "♊", desc: "风象/变动。好奇、双重、传播。关键词：我想。", ruler: "水星", multi: "处女" },
         { name: "巨蟹座", sym: "♋", desc: "水象/创始。敏感、滋养、保护。关键词：我感觉。", ruler: "月亮" },
         { name: "狮子座", sym: "♌", desc: "火象/固定。华丽、骄傲、创造。关键词：我意志。", ruler: "太阳" },
         { name: "处女座", sym: "♍", desc: "土象/变动。精细、批判、服务。关键词：我分析。", ruler: "水星", multi: "双子" },
@@ -199,60 +186,55 @@
         "12宫：潜意识、遁世、幕后、秘密、业力债务。"
     ];
 
-    let current = null;
+    function startRoll() {
+        const dp = document.getElementById('dice-p');
+        const ds = document.getElementById('dice-s');
+        const dh = document.getElementById('dice-h');
+        [dp, ds, dh].forEach(d => d.classList.add('rolling'));
 
-    function roll() {
-        const p = planets[Math.floor(Math.random() * planets.length)];
-        const s = signs[Math.floor(Math.random() * signs.length)];
-        const h = Math.floor(Math.random() * 12) + 1;
-        current = { p, s, h };
+        setTimeout(() => {
+            [dp, ds, dh].forEach(d => d.classList.remove('rolling'));
+            const p = planets[Math.floor(Math.random()*planets.length)];
+            const s = signs[Math.floor(Math.random()*signs.length)];
+            const h = Math.floor(Math.random()*12) + 1;
 
-        document.getElementById('p-hex').innerHTML = `<span class="sym">${p.sym}</span><span class="name">${p.name}</span>`;
-        document.getElementById('s-hex').innerHTML = `<span class="sym">${s.sym}</span><span class="name">${s.name}</span>`;
-        document.getElementById('h-hex').innerHTML = `<span class="sym">${h}</span><span class="name">${h}宫</span>`;
-        
-        document.getElementById('result-card').style.display = 'block';
-        document.getElementById('title-text').innerText = `${p.name} 落入 ${s.name} · ${h}宫`;
-        document.getElementById('p-desc').innerText = p.desc;
-        document.getElementById('s-desc').innerText = s.desc;
-        document.getElementById('h-desc').innerText = houses[h-1];
-        
-        updateRelative();
+            const rots = ["rotateX(0deg)","rotateY(180deg)","rotateY(90deg)","rotateY(-90deg)","rotateX(90deg)","rotateX(-90deg)"];
+            dp.style.transform = rots[Math.floor(Math.random()*6)];
+            ds.style.transform = rots[Math.floor(Math.random()*6)];
+            dh.style.transform = rots[Math.floor(Math.random()*6)];
+
+            document.querySelectorAll('.front').forEach((f, i) => {
+                if(i===0) f.innerText = p.sym;
+                if(i===1) f.innerText = s.sym;
+                if(i===2) f.innerText = h;
+            });
+
+            document.getElementById('res-card').style.display = 'block';
+            document.getElementById('res-title').innerText = `${p.name} 落 ${s.name} · ${h}宫`;
+            document.getElementById('res-p-desc').innerText = p.desc;
+            document.getElementById('res-s-desc').innerText = s.desc;
+            document.getElementById('res-h-desc').innerText = houses[h-1];
+            
+            document.getElementById('res-rel').innerText = `💡 伴侣视角(7宫视角)：相当于其第 ${(h-7+12)%12+1} 宫。`;
+            let fly = `✨ 飞星：请观察原局【${s.ruler}】落位。`;
+            if(s.multi) fly += ` (${s.ruler}亦守护${s.multi})`;
+            document.getElementById('res-fly').innerText = fly;
+        }, 1200);
     }
 
-    function updateRelative() {
-        if (!current) return;
-        const base = parseInt(document.getElementById('baseHouse').value);
-        const relH = (current.h - base + 12) % 12 + 1;
-        
-        const relativeInfo = base === 1 ? "当前显示为本人视角解读。" : `转宫结论：在对方视角下，这发生在其第 ${relH} 宫 (${houses[relH-1].split('：')[1]})`;
-        document.getElementById('relative-result').innerText = relativeInfo;
-
-        let flyStr = `✨ 飞星观察：请移步原局中【${current.s.ruler}】落入的宫位进行联动分析。`;
-        if (current.s.multi) flyStr += ` (${current.s.ruler}同时守护${current.s.name}与${current.s.multi}座)`;
-        document.getElementById('fly-star').innerText = flyStr;
-    }
-
-    function saveRecord() {
-        if (!current) return;
-        const history = document.getElementById('history-list');
-        const item = document.createElement('div');
-        item.style = "background:rgba(255,255,255,0.05); padding:10px; border-radius:10px; margin-top:10px; font-size:12px; display:flex; justify-content:space-between; border-left:2px solid var(--accent-color)";
-        item.innerHTML = `<span>${current.p.sym} ${current.s.sym} ${current.h}宫</span> <span style="opacity:0.5">${new Date().toLocaleTimeString()}</span>`;
-        history.insertBefore(item, history.firstChild);
-    }
-
-    function toggleConfig() {
-        const p = document.getElementById('config-panel');
-        p.style.display = p.style.display === 'block' ? 'none' : 'block';
-    }
-
-    function applyConfig() {
-        const bg = document.getElementById('bg-input').value;
-        const clr = document.getElementById('color-input').value;
-        if(bg) document.body.style.backgroundImage = `url('${bg}')`;
-        document.documentElement.style.setProperty('--accent-color', clr);
-        toggleConfig();
+    function downloadImage() {
+        const area = document.getElementById('capture-area');
+        // 由于有背景图，设置透明背景以便 canvas 抓取
+        html2canvas(area, { 
+            backgroundColor: null, 
+            scale: 2,
+            useCORS: true 
+        }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = `AstroResult_${Date.now()}.png`;
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+        });
     }
 </script>
 </body>
