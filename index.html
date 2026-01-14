@@ -273,8 +273,10 @@
                         // 5. 应用最终停止动作
                         const finalPos = "rotateX(1440deg) rotateY(1440deg) rotateZ(0deg)";
                         [dp, ds, dh].forEach(d => {
+                                // 赋予停止时的平滑刹车感
                                 d.style.transition = "transform 1.5s cubic-bezier(0.2, 0.8, 0.3, 1.1)";
-                                d.style.transform = finalPos;
+                                // 强制回归 0,0 坐标（1440=360*4），让 Front 面正对用户
+                                d.style.transform = "rotateX(1440deg) rotateY(1440deg)"; 
                         });
 
                         // 6. 同步更新下方释义
