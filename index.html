@@ -245,48 +245,50 @@
                 const dh = document.getElementById('dice-h');
                 const btn = document.querySelector('.btn-roll');
 
+                // 1. 基础状态重置
                 btn.disabled = true;
                 btn.style.opacity = "0.5";
+                document.getElementById('res-card').style.display = 'none';
 
-                // 1. 生成本次结果
+                // 2. 生成结果
                 const p = planets[Math.floor(Math.random() * planets.length)];
                 const s = signs[Math.floor(Math.random() * signs.length)];
                 const hIndex = Math.floor(Math.random() * 12); 
                 const h = hIndex + 1;
 
-                // 2. 开始旋转动画
+                // 3. 开始旋转 (动画类里有 rotateX/Y/Z 的混合)
                 [dp, ds, dh].forEach(d => {
                         d.classList.add('rolling');
-                        d.style.transition = "none";
+                        d.style.transition = "none"; 
                 });
 
                 setTimeout(() => {
-                        // 3. 停止动画类
+                        // 4. 停止动画类
                         [dp, ds, dh].forEach(d => d.classList.remove('rolling'));
 
-                        // 4. 核心修复：遍历所有面 (.face)，把结果填进每一个面
-                        // 这样不管骰子停在哪个角度，你看到的文字都是最新的
+                        // 5. 将结果填入【每一个面】
+                        // 这样即使旋转过程中也能看到正确的符号
                         dp.querySelectorAll('.face').forEach(face => face.innerText = p.sym);
                         ds.querySelectorAll('.face').forEach(face => face.innerText = s.sym);
                         dh.querySelectorAll('.face').forEach(face => face.innerText = h);
 
-                        // 5. 应用最终停止动作
-                        const finalPos = "rotateX(1440deg) rotateY(1440deg) rotateZ(0deg)";
+                        // 6. 【核心修复】：强制归零
+                        // 不管之前转成什么样，停止时强制回到初始的、绝对正向的 0,0,0 坐标
                         [dp, ds, dh].forEach(d => {
-                                // 赋予停止时的平滑刹车感
-                                d.style.transition = "transform 1.5s cubic-bezier(0.2, 0.8, 0.3, 1.1)";
-                                // 强制回归 0,0 坐标（1440=360*4），让 Front 面正对用户
-                                d.style.transform = "rotateX(1440deg) rotateY(1440deg)"; 
+                                // 刹车过渡效果
+                                d.style.transition = "transform 1.2s cubic-bezier(0.15, 0.85, 0.35, 1.1)";
+                                // 直接归零，这是最不可能出现镜像反转的角度
+                                d.style.transform = "rotateX(0deg) rotateY(0deg) rotateZ(0deg)"; 
                         });
 
-                        // 6. 同步更新下方释义
+                        // 7. 更新文本卡片
                         document.getElementById('res-card').style.display = 'block';
                         document.getElementById('res-title').innerText = `${p.name} 落 ${s.name} · ${h}宫`;
                         document.getElementById('res-p-desc').innerText = p.desc;
                         document.getElementById('res-s-desc').innerText = s.desc;
                         document.getElementById('res-h-desc').innerText = houses[hIndex];
 
-                        // 7. 更新底部信息
+                        // 8. 底部关联逻辑
                         document.getElementById('res-rel').innerText = `💡 伴侣视角(7宫视角)：相当于其第 ${(h - 7 + 12) % 12 + 1} 宫。`;
                         let fly = `✨ 飞星：请观察原局【${s.ruler}】落位。`;
                         if (s.multi) fly += ` (${s.ruler}亦守护${s.multi})`;
@@ -294,7 +296,7 @@
 
                         btn.disabled = false;
                         btn.style.opacity = "1";
-                }, 1200);
+                }, 1000); // 缩短一点等待时间，体验更爽快
         }
     
     function downloadImage() {
