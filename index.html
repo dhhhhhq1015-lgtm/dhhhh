@@ -48,34 +48,38 @@
             transition: transform 1.5s cubic-bezier(0.2, 0.8, 0.3, 1.1);
         }
 
-        /* 2. 修改面：改为六边形裁切，能更好合拢 */
+        /* 2. 修改面：放弃裁切，改用伪元素或边框组合，解决横杠问题 */
         .face {
-           position: absolute;
-           width: 90px;
-           height: 90px;
-           background: #16161a;
-        /* 保持裁切 */
-          clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
-    
-        /* --- 修复部分：删除之前的 border 和 outline，改用以下组合 --- */
-          border: none; /* 先彻底关掉边框 */
-    
-        /* 1. 用内阴影模拟内圈金线（彻底解决横杠问题） */
-          box-shadow: inset 0 0 0 2px var(--gold),  /* 第一层：模拟金线 */
-                inset 0 0 15px rgba(0,0,0,0.8); /* 第二层：增加深邃感 */
-    
-        /* 2. 添加外发光（参考图中那种柔和感） */
-          filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.2)); 
-    
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 2rem;
-          color: var(--gold);
-          backface-visibility: hidden;
+            position: absolute;
+            width: 90px;
+            height: 90px;
+            background: #16161a;
+            /* 重点 1：取消 clip-path，改用真正的边框 */
+            border: 1px solid var(--gold);
+            /* 重点 2：利用圆角微调，模拟多边形宝石的钝角感，且不会产生横杠 */
+            border-radius: 12px; 
+            
+            /* 精细的内阴影，增加立体感 */
+            box-shadow: inset 0 0 12px rgba(201, 176, 103, 0.2), 
+                        inset 0 0 20px rgba(0,0,0,0.9);
+            
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: var(--gold);
+            backface-visibility: hidden;
+            
+            /* 解决可能的锯齿问题 */
+            outline: 1px solid transparent;
         }
 
-        /* 3. 修改位移：必须是 90px 的一半，即 45px */
+        /* 增加一个外发光层，让它看起来像宝石 */
+        .dice-3d {
+            filter: drop-shadow(0 0 10px rgba(201, 176, 103, 0.2));
+        }
+
+        /* 3. 位移保持 45px 绝对不动 */
         .front  { transform: rotateY(0deg) translateZ(45px); }
         .back   { transform: rotateY(180deg) translateZ(45px); }
         .right  { transform: rotateY(90deg) translateZ(45px); }
