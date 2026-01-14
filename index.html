@@ -271,7 +271,7 @@
                         dh.querySelectorAll('.face').forEach(face => face.innerText = h);
 
                         // 5. 应用最终停止动作
-                        const finalPos = "rotateX(1440deg) rotateY(1440deg) rotateZ(1440deg)";
+                        const finalPos = "rotateX(1440deg) rotateY(1440deg) rotateZ(0deg)";
                         [dp, ds, dh].forEach(d => {
                                 d.style.transition = "transform 1.5s cubic-bezier(0.2, 0.8, 0.3, 1.1)";
                                 d.style.transform = finalPos;
