@@ -41,23 +41,42 @@
         }
 
         .dice-3d { width: 70px; height: 70px; position: relative; transform-style: preserve-3d; transition: transform 1.5s cubic-bezier(0.2, 0.8, 0.3, 1.1); }
+        /* --- 骰子面外观：参考图宝石质感 --- */
         .face {
-            position: absolute; width: 70px; height: 70px;
-            background: linear-gradient(145deg, #1a1a2e, #0a0a15);
-            border: 1.5px solid var(--gold); display: flex; align-items: center; justify-content: center;
-            font-size: 1.8rem; color: var(--gold); box-shadow: inset 0 0 10px rgba(201, 176, 103, 0.3);
-            backface-visibility: hidden; border-radius: 10px;
+            position: absolute;
+            width: 100px; /* 统一放大到 100px */
+            height: 100px;
+            background: #1a1a1a; 
+            /* 核心：裁切成类五边形宝石视觉 */
+            clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+            /* 边框设计：外白内金双层感 */
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            outline: 1px solid var(--gold);
+            outline-offset: -4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            color: var(--gold);
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.8);
+            backface-visibility: hidden;
+            /* 移除原有的 border-radius，因为 clip-path 已经定义了形状 */
         }
 
-        .front { transform: rotateY(0deg) translateZ(35px); }
-        .back { transform: rotateY(180deg) translateZ(35px); }
-        .right { transform: rotateY(90deg) translateZ(35px); }
-        .left { transform: rotateY(-90deg) translateZ(35px); }
-        .top { transform: rotateX(90deg) translateZ(35px); }
-        .bottom { transform: rotateX(-90deg) translateZ(35px); }
+        /* --- 3D 坐标：必须是宽度(100)的一半，即 50px --- */
+        .front  { transform: rotateY(0deg) translateZ(50px); }
+        .back   { transform: rotateY(180deg) translateZ(50px); }
+        .right  { transform: rotateY(90deg) translateZ(50px); }
+        .left   { transform: rotateY(-90deg) translateZ(50px); }
+        .top    { transform: rotateX(90deg) translateZ(50px); }
+        .bottom { transform: rotateX(-90deg) translateZ(50px); }
 
+        /* --- 旋转动画逻辑保持不变 --- */
         .rolling { animation: spin 0.4s infinite linear; }
-        @keyframes spin { from { transform: rotateX(0) rotateY(0); } to { transform: rotateX(360deg) rotateY(360deg); } }
+        @keyframes spin { 
+            from { transform: rotateX(0) rotateY(0); } 
+            to { transform: rotateX(360deg) rotateY(360deg); } 
+        }
 
         /* --- 结果卡片（75% 透明度） --- */
         .main-layout { width: 100%; max-width: 650px; }
