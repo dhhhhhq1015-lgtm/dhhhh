@@ -31,89 +31,73 @@
         .btn-mini { background: rgba(255,255,255,0.1); border: 1px solid var(--gold); color: var(--gold); padding: 5px 15px; border-radius: 20px; cursor: pointer; font-size: 12px; backdrop-filter: blur(5px); }
 
         /* --- 3D 骰子区域 --- */
-/* --- 1. 舞台与容器：保证 3D 空间稳定 --- */
-    .dice-stage {
-        display: flex;
-        justify-content: center;
-        gap: 50px;
-        perspective: 1200px; /* 增加透视深度 */
-        margin: 60px 0;
-        height: 120px;
-    }
+        /* --- 1. 舞台与容器：增加透视深度以稳定视角 --- */
+        .dice-stage {
+                display: flex;
+                justify-content: center;
+                gap: 50px;
+                perspective: 1500px; /* 强化透视 */
+                margin: 60px 0;
+                height: 120px;
+        }
 
-    .dice-3d { 
-        width: 100px; 
-        height: 100px; 
-        position: relative; 
-        transform-style: preserve-3d; 
-        transition: transform 1.5s cubic-bezier(0.2, 0.8, 0.3, 1.1);
-        filter: drop-shadow(0 0 15px rgba(201, 176, 103, 0.3)); /* 整体金色发光 */
-    }
+        .dice-3d { 
+                width: 100px; 
+                height: 100px; 
+                position: relative; 
+                transform-style: preserve-3d; 
+                /* 增加平滑度，防止点击瞬间剧烈抖动 */
+                transition: transform 2s cubic-bezier(0.15, 0.85, 0.35, 1.1);
+                filter: drop-shadow(0 0 15px rgba(201, 176, 103, 0.3));
+        }
 
-    /* --- 2. 骰子面：六边形宝石质感，彻底消除横杠 --- */
-    .face {
-        position: absolute;
-        width: 100px;
-        height: 100px;
-        background: #121216; /* 深邃底色 */
-        
-        /* 六边形裁切：保证旋转时边缘能够覆盖立方体骨架 */
-        clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
-        
-        /* 核心修复：使用 inset 阴影替代 border/outline，彻底消除乱码横杠 */
-        box-shadow: 
-            inset 0 0 0 1px rgba(201, 176, 103, 0.8), /* 模拟细金线 */
-            inset 0 0 20px rgba(0, 0, 0, 0.9);         /* 增加深向内凹的立体感 */
-        
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 2.4rem;
-        color: var(--gold);
-        
-        /* 关键修复：解决投掷后消失的问题 */
-        backface-visibility: visible !important; 
-        -webkit-backface-visibility: visible !important;
-        transform-style: preserve-3d;
-    }
+        /* --- 2. 骰子面：采用精密六边形坐标，解决乱码横杠 --- */
+        .face {
+                position: absolute;
+                width: 100px;
+                height: 100px;
+                background: #121216; 
+                
+                /* 精确六边形裁切，确保面与面之间边缘重合，不露缝 */
+                clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+                
+                /* 放弃 outline 改用 inset box-shadow，彻底消除残留横杠 */
+                box-shadow: 
+                        inset 0 0 0 1px rgba(201, 176, 103, 0.6), 
+                        inset 0 0 20px rgba(0, 0, 0, 0.9);
+                
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 2.4rem;
+                color: var(--gold);
+                
+                /* 核心修复：防止投掷后某个面因为“背面剔除”而消失 */
+                backface-visibility: visible !important; 
+                -webkit-backface-visibility: visible !important;
+                transform-style: preserve-3d;
+                
+                /* 硬件加速，提升旋转性能 */
+                will-change: transform;
+        }
 
-    /* --- 3. 物理对齐位移：100px 宽度对应精确的 50px 位移 --- */
-    /* 增加 0.1px 修正量防止面片在停止时发生层级冲突（闪烁） */
-    .front  { transform: rotateY(0deg) translateZ(50.1px); }
-    .back   { transform: rotateY(180deg) translateZ(50.1px); }
-    .right  { transform: rotateY(90deg) translateZ(50.1px); }
-    .left   { transform: rotateY(-90deg) translateZ(50.1px); }
-    .top    { transform: rotateX(90deg) translateZ(50.1px); }
-    .bottom { transform: rotateX(-90deg) translateZ(50.1px); }
+        /* --- 3. 物理位移修复：100px宽度必须对应精确的50px位移 --- */
+        /* 增加0.1px的偏移量，防止面片在停止时发生层级冲突（Z-fighting） */
+        .front  { transform: rotateY(0deg) translateZ(50.1px); }
+        .back   { transform: rotateY(180deg) translateZ(50.1px); }
+        .right  { transform: rotateY(90deg) translateZ(50.1px); }
+        .left   { transform: rotateY(-90deg) translateZ(50.1px); }
+        .top    { transform: rotateX(90deg) translateZ(50.1px); }
+        .bottom { transform: rotateX(-90deg) translateZ(50.1px); }
 
-    /* --- 4. 旋转动画 --- */
-    .rolling { animation: spin 0.5s infinite linear; }
-    @keyframes spin { 
-        from { transform: rotateX(0) rotateY(0) rotateZ(0); } 
-        to { transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg); } 
-    }
-
-    /* --- 5. 极简透明按钮：白色背景 20% 透明 --- */
-    .btn-roll {
-        background: rgba(255, 255, 255, 0.2); 
-        color: #ffffff; 
-        border: 1px solid rgba(255, 255, 255, 0.6); 
-        padding: 14px 80px; 
-        border-radius: 40px;
-        font-weight: bold; 
-        cursor: pointer; 
-        font-size: 18px; 
-        margin: 40px auto; 
-        display: block;
-        backdrop-filter: blur(10px); /* 毛玻璃感 */
-        letter-spacing: 5px;
-        transition: all 0.3s ease;
-    }
-
-    .btn-roll:hover {
-        background: rgba(255, 255, 255, 0.35);
-        transform: translateY(-2px);
-    }
+        /* --- 4. 旋转动画：增加Z轴旋转使路径更随机复杂 --- */
+        .rolling { 
+                animation: spin 0.4s infinite linear; 
+        }
+        @keyframes spin { 
+                from { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); } 
+                to { transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg); } 
+        }
 
         /* --- 结果卡片（75% 透明度） --- */
         .main-layout { width: 100%; max-width: 650px; }
