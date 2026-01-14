@@ -40,36 +40,39 @@
             height: 100px;
         }
 
-        .dice-3d { width: 70px; height: 70px; position: relative; transform-style: preserve-3d; transition: transform 1.5s cubic-bezier(0.2, 0.8, 0.3, 1.1); }
-        /* --- 骰子面外观：参考图宝石质感 --- */
+        /* 1. 修改容器大小 */
+        .dice-3d { 
+            width: 90px; height: 90px; 
+            position: relative; 
+            transform-style: preserve-3d; 
+            transition: transform 1.5s cubic-bezier(0.2, 0.8, 0.3, 1.1);
+        }
+
+        /* 2. 修改面：改为六边形裁切，能更好合拢 */
         .face {
             position: absolute;
-            width: 100px; /* 统一放大到 100px */
-            height: 100px;
-            background: #1a1a1a; 
-            /* 核心：裁切成类五边形宝石视觉 */
-            clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
-            /* 边框设计：外白内金双层感 */
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            width: 90px; height: 90px;
+            background: #16161a; 
+            /* 重点：六边形裁切比五边形在立方体架构下更稳定 */
+            clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+            border: 1px solid rgba(201, 176, 103, 0.3);
             outline: 1px solid var(--gold);
             outline-offset: -4px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2.2rem;
+            font-size: 2rem;
             color: var(--gold);
-            box-shadow: inset 0 0 15px rgba(0,0,0,0.8);
             backface-visibility: hidden;
-            /* 移除原有的 border-radius，因为 clip-path 已经定义了形状 */
         }
 
-        /* --- 3D 坐标：必须是宽度(100)的一半，即 50px --- */
-        .front  { transform: rotateY(0deg) translateZ(50px); }
-        .back   { transform: rotateY(180deg) translateZ(50px); }
-        .right  { transform: rotateY(90deg) translateZ(50px); }
-        .left   { transform: rotateY(-90deg) translateZ(50px); }
-        .top    { transform: rotateX(90deg) translateZ(50px); }
-        .bottom { transform: rotateX(-90deg) translateZ(50px); }
+        /* 3. 修改位移：必须是 90px 的一半，即 45px */
+        .front  { transform: rotateY(0deg) translateZ(45px); }
+        .back   { transform: rotateY(180deg) translateZ(45px); }
+        .right  { transform: rotateY(90deg) translateZ(45px); }
+        .left   { transform: rotateY(-90deg) translateZ(45px); }
+        .top    { transform: rotateX(90deg) translateZ(45px); }
+        .bottom { transform: rotateX(-90deg) translateZ(45px); }
 
         /* --- 旋转动画逻辑保持不变 --- */
         .rolling { animation: spin 0.4s infinite linear; }
