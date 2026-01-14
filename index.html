@@ -56,7 +56,20 @@
                 position: absolute;
                 width: 100px;
                 height: 100px;
-                background: #121216; 
+                background: #121216;
+
+               /* 这里是新加入的内容：强制解决文字反向问题 */
+                backface-visibility: hidden !important;
+                -webkit-backface-visibility: hidden !important;
+                
+                /* 注意：如果加入这行后文字还是反的，请尝试把 scaleX(1) 改为 scaleX(-1) */
+                transform: scaleX(1) !important; 
+                
+                /* 确保文字在最表层 */
+                z-index: 10;
+                display: flex;
+                align-items: center;
+                justify-content: center;
                 
                 /* 精确六边形裁切，确保面与面之间边缘重合，不露缝 */
                 clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
