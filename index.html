@@ -26,130 +26,199 @@
             padding: 20px;
         }
 
-        /* --- 骰子区域：增加外发光与呼吸效果 --- */
+        /* --- 按钮与页眉 --- */
+        .header { width: 100%; max-width: 800px; display: flex; justify-content: space-between; margin-bottom: 20px; }
+        .btn-mini { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 6px 18px; border-radius: 20px; cursor: pointer; font-size: 12px; backdrop-filter: blur(5px); }
+
+        /* --- 1. 放大骰子并增加呼吸感外发光 --- */
         .dice-stage {
             display: flex;
             justify-content: center;
             gap: 50px;
             perspective: 1200px;
-            margin: 80px 0 40px 0;
+            margin: 80px 0 30px 0;
         }
 
         .dice-3d { 
-            width: 100px; 
-            height: 100px; 
+            width: 110px; /* 进一步放大比例 */
+            height: 110px; 
             position: relative; 
             transform-style: preserve-3d; 
             transition: transform 1.5s cubic-bezier(0.2, 0.8, 0.3, 1.1);
-            /* 外层光晕动画 */
-            filter: drop-shadow(0 0 10px rgba(201, 176, 103, 0.3));
-            animation: breathe 3s infinite ease-in-out;
+            /* 外发光效果 */
+            filter: drop-shadow(0 0 15px rgba(201, 176, 103, 0.4));
+            animation: breathe 4s infinite ease-in-out;
         }
 
         @keyframes breathe {
-            0%, 100% { filter: drop-shadow(0 0 5px rgba(201, 176, 103, 0.2)); }
-            50% { filter: drop-shadow(0 0 20px rgba(201, 176, 103, 0.6)); }
+            0%, 100% { filter: drop-shadow(0 0 8px rgba(201, 176, 103, 0.3)); transform: scale(1); }
+            50% { filter: drop-shadow(0 0 25px rgba(201, 176, 103, 0.7)); transform: scale(1.02); }
         }
 
         .face {
             position: absolute; 
-            width: 100px; 
-            height: 100px;
-            background: rgba(15, 15, 25, 0.8);
-            /* 六边形形状 */
+            width: 110px; 
+            height: 110px;
+            background: rgba(15, 15, 25, 0.85);
+            /* 默认六边形轮廓 */
             clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-            /* 双层细边框感 */
-            border: 1px solid rgba(255, 255, 255, 0.5);
+            /* 双层细边框：参考图中精致感 */
+            border: 1px solid rgba(255, 255, 255, 0.4);
             outline: 1px solid var(--gold);
-            outline-offset: -5px;
+            outline-offset: -6px;
             
             display: flex; 
             align-items: center; 
             justify-content: center;
-            font-size: 2.2rem; 
+            font-size: 2.5rem; 
             color: var(--text-white); 
             backface-visibility: hidden;
         }
 
-        /* 3D 转换位置 */
-        .front  { transform: rotateY(0deg) translateZ(48px); }
-        .back   { transform: rotateY(180deg) translateZ(48px); }
-        .right  { transform: rotateY(90deg) translateZ(48px); }
-        .left   { transform: rotateY(-90deg) translateZ(48px); }
-        .top    { transform: rotateX(90deg) translateZ(48px); }
-        .bottom { transform: rotateX(-90deg) translateZ(48px); }
+        /* 3D 转换坐标：适配 110px 尺寸 */
+        .front  { transform: rotateY(0deg) translateZ(55px); }
+        .back   { transform: rotateY(180deg) translateZ(55px); }
+        .right  { transform: rotateY(90deg) translateZ(55px); }
+        .left   { transform: rotateY(-90deg) translateZ(55px); }
+        .top    { transform: rotateX(90deg) translateZ(55px); }
+        .bottom { transform: rotateX(-90deg) translateZ(55px); }
 
         .rolling { animation: spin 0.4s infinite linear; }
         @keyframes spin { from { transform: rotateX(0) rotateY(0); } to { transform: rotateX(360deg) rotateY(360deg); } }
 
-        /* --- 投掷按钮：白色背景 50% 透明 --- */
+        /* --- 2. 投掷按钮：白色背景 50% 透明 + 细白边框 --- */
         .btn-roll {
-            background: rgba(255, 255, 255, 0.5); /* 白色背景 50% 透明 */
-            color: #ffffff; /* 文字白色 */
-            border: 1px solid rgba(255, 255, 255, 0.8); /* 白色细边框 */
-            padding: 12px 60px; 
-            border-radius: 30px;
+            background: rgba(255, 255, 255, 0.5); 
+            color: #ffffff; 
+            border: 1px solid rgba(255, 255, 255, 0.8); 
+            padding: 14px 80px; 
+            border-radius: 40px;
             font-weight: bold; 
             cursor: pointer; 
             font-size: 18px; 
             margin: 40px auto; 
             display: block;
-            backdrop-filter: blur(10px); /* 磨砂玻璃效果 */
-            letter-spacing: 4px;
-            transition: 0.3s;
+            backdrop-filter: blur(12px);
+            letter-spacing: 5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(255,255,255,0.1);
         }
 
         .btn-roll:hover {
             background: rgba(255, 255, 255, 0.65);
-            transform: scale(1.05);
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(255,255,255,0.2);
         }
 
         /* --- 结果卡片样式 --- */
         .card {
             background: var(--glass);
             backdrop-filter: blur(25px);
-            border-radius: 20px;
+            border-radius: 24px;
             padding: 25px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             width: 100%;
-            max-width: 600px;
+            max-width: 650px;
             display: none;
-            margin-top: 30px;
+            margin-top: 20px;
         }
 
-        .title { color: var(--gold); text-align: center; font-size: 1.4rem; margin-bottom: 20px; }
-        .box h4 { color: var(--gold); font-size: 13px; margin-bottom: 5px; }
-        .box p { font-size: 14px; line-height: 1.6; color: white; margin: 0; }
-        .footer-info { margin-top: 20px; font-size: 12px; color: rgba(255,255,255,0.7); border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; }
+        .title { font-size: 1.5rem; text-align: center; color: var(--gold); margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .box h4 { color: var(--gold); margin: 0 0 8px 0; font-size: 13px; border-left: 2px solid var(--gold); padding-left: 8px; }
+        .box p { font-size: 14px; color: var(--text-white); line-height: 1.6; margin: 0; }
+        .footer-info { background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 12px; margin-top: 20px; font-size: 13px; color: white; border: 1px solid rgba(255,255,255,0.1); }
     </style>
 </head>
 <body>
 
-<div id="capture-area" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+<div class="header">
+    <button class="btn-mini" onclick="location.reload()">✨ 刷新重置</button>
+    <button class="btn-mini" onclick="downloadImage()">📸 导出结果</button>
+</div>
+
+<div id="capture-area" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
     <div class="dice-stage">
-        <div class="dice-3d" id="dice-p"><div class="face front">?</div><div class="face back">☉</div><div class="face right">☽</div><div class="face left">♂</div><div class="face top">☿</div><div class="face bottom">♃</div></div>
-        <div class="dice-3d" id="dice-s"><div class="face front">?</div><div class="face back">♈</div><div class="face right">♉</div><div class="face left">♊</div><div class="face top">♋</div><div class="face bottom">♌</div></div>
-        <div class="dice-3d" id="dice-h"><div class="face front">?</div><div class="face back">1</div><div class="face right">4</div><div class="face left">7</div><div class="face top">10</div><div class="face bottom">12</div></div>
+        <div class="dice-3d" id="dice-p">
+            <div class="face front">?</div><div class="face back">☉</div>
+            <div class="face right">☽</div><div class="face left">♂</div>
+            <div class="face top">☿</div><div class="face bottom">♃</div>
+        </div>
+        <div class="dice-3d" id="dice-s">
+            <div class="face front">?</div><div class="face back">♈</div>
+            <div class="face right">♉</div><div class="face left"> Gemini</div>
+            <div class="face top">♋</div><div class="face bottom">♌</div>
+        </div>
+        <div class="dice-3d" id="dice-h">
+            <div class="face front">?</div><div class="face back">1</div>
+            <div class="face right">4</div><div class="face left">7</div>
+            <div class="face top">10</div><div class="face bottom">12</div>
+        </div>
     </div>
 
     <button class="btn-roll" onclick="startRoll()">投掷骰子</button>
 
     <div class="card" id="res-card">
         <div class="title" id="res-title"></div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-            <div class="box"><h4>行星</h4><p id="res-p"></p></div>
-            <div class="box"><h4>星座</h4><p id="res-s"></p></div>
+        <div class="grid">
+            <div class="box"><h4>行星能量</h4><p id="res-p-desc"></p></div>
+            <div class="box"><h4>星座特质</h4><p id="res-s-desc"></p></div>
         </div>
-        <div class="box" style="margin-top:20px;"><h4>领域</h4><p id="res-h"></p></div>
-        <div class="footer-info" id="res-rel"></div>
+        <div class="box" style="margin-top:20px;"><h4>生命领域</h4><p id="res-h-desc"></p></div>
+        <div class="footer-info">
+            <div id="res-rel" style="color:var(--gold); font-weight:bold; margin-bottom:8px;"></div>
+            <div id="res-fly" style="opacity:0.9"></div>
+        </div>
     </div>
 </div>
 
 <script>
-    // 逻辑部分保持之前的高质量释义库
-    const planets = [{name:"太阳",sym:"☉",desc:"核心意志、目标。"},{name:"月亮",sym:"☽",desc:"内在情绪、安全感。"},{name:"水星",sym:"☿",desc:"沟通、思维。"},{name:"金星",sym:"♀",desc:"价值、爱情、美。"},{name:"火星",sym:"♂",desc:"行动力、冲突。"},{name:"木星",sym:"♃",desc:"扩张、幸运。"},{name:"土星",sym:"♄",desc:"限制、责任。"}];
-    const signs = [{name:"白羊座",sym:"♈",desc:"火象/开创。"},{name:"金牛座",sym:"♉",desc:"土象/固定。"},{name:"双子座",sym:"♊",desc:"风象/变动。"},{name:"巨蟹座",sym:"♋",desc:"水象/开创。"},{name:"狮子座",sym:"♌",desc:"火象/固定。"},{name:"处女座",sym:"♍",desc:"土象/变动。"}];
-    
+    // --- 严格保留的详细释义库 ---
+    const planets = [
+        { name: "太阳", sym: "☉", desc: "核心意志、目标感、荣耀、权威。代表“我要如何发光”。" },
+        { name: "月亮", sym: "☽", desc: "内在情绪、滋养需求、潜意识、母性。代表“我需要什么安全感”。" },
+        { name: "水星", sym: "☿", desc: "沟通、逻辑、信息传播、短途旅行。代表“我如何思考与表达”。" },
+        { name: "金星", sym: "♀", desc: "美、和谐、金钱价值、感官享受、爱情。代表“我渴望什么价值”。" },
+        { name: "火星", sym: "♂", desc: "行动力、欲望、竞争、冲突、性。代表“我如何去获取/争夺”。" },
+        { name: "木星", sym: "♃", desc: "扩张、幸运、高等教育、法律、机遇。代表“我如何获得成长”。" },
+        { name: "土星", sym: "♄", desc: "限制、责任、磨练、结构、长者。代表“我必须承担什么压力”。" },
+        { name: "天王星", sym: "♅", desc: "突变、原创、离经叛道、觉醒。代表“我在哪里追求自由”。" },
+        { name: "海王星", sym: "♆", desc: "梦幻、模糊、疗愈、艺术、牺牲。代表“我在哪里容易沉溺/灵性”。" },
+        { name: "冥王星", sym: "♇", desc: "深度转化、权力、极致、死亡与重生。代表“我如何彻底蜕变”。" },
+        { name: "北交点", sym: "☊", desc: "今生努力的方向、灵魂渴求的扩展点。" },
+        { name: "南交点", sym: "☋", desc: "过去熟悉的模式、习惯、需要舍弃的舒适区。" }
+    ];
+
+    const signs = [
+        { name: "白羊座", sym: "♈", desc: "火象/创始。直接、鲁莽、开创性。关键词：我是。", ruler: "火星", multi: "天蝎" },
+        { name: "金牛座", sym: "♉", desc: "土象/固定。稳健、物质、感官享受。关键词：我有。", ruler: "金星", multi: "天秤" },
+        { name: "双子座", sym: "♊", desc: "风象/变动。好奇、双重、传播。关键词：我想。", ruler: "水星", multi: "处女" },
+        { name: "巨蟹座", sym: "♋", desc: "水象/创始。敏感、滋养、保护。关键词：我感觉。", ruler: "月亮" },
+        { name: "狮子座", sym: "♌", desc: "火象/固定。华丽、骄傲、创造。关键词：我意志。", ruler: "太阳" },
+        { name: "处女座", sym: "♍", desc: "土象/变动。精细、批判、服务。关键词：我分析。", ruler: "水星", multi: "双子" },
+        { name: "天秤座", sym: "♎", desc: "风象/创始。权衡、和谐、社交。关键词：我平衡。", ruler: "金星", multi: "金牛" },
+        { name: "天蝎座", sym: "♏", desc: "水象/固定。深邃、极致、转化。关键词：我渴望。", ruler: "火星", multi: "白羊" },
+        { name: "射手座", sym: "♐", desc: "火象/变动。乐观、远大、探索。关键词：我理解。", ruler: "木星", multi: "双鱼" },
+        { name: "摩羯座", sym: "♑", desc: "土象/创始。务实、野心、克制。关键词：我利用。", ruler: "土星", multi: "水瓶" },
+        { name: "水瓶座", sym: "♒", desc: "风象/固定。独立、客观、超前。关键词：我知晓。", ruler: "土星", multi: "摩羯" },
+        { name: "双鱼座", sym: "♓", desc: "水象/变动。慈悲、消融、灵性。关键词：我信奉。", ruler: "木星", multi: "射手" }
+    ];
+
+    const houses = [
+        "1宫：自我、外貌、生命力、人格面具。",
+        "2宫：正财、价值观、个人资产、安全感来源。",
+        "3宫：兄弟姊妹、邻居、短期旅行、沟通交流。",
+        "4宫：原生家庭、父亲、晚年生活、心理根基、不动产。",
+        "5宫：恋爱、子女、创造力、投机、游戏娱乐。",
+        "6宫：日常劳作、健康、宠物、同事、服务。",
+        "7宫：婚姻伴侣、一对一合约、竞争对手、公开的敌人。",
+        "8宫：偏财、危机、他人钱财、深层欲望、疾厄。",
+        "9宫：高等教育、宗教哲学、远行、长途旅行。",
+        "10宫：事业成就、社会地位、母亲、长辈名望。",
+        "11宫：社交圈子、团体利益、朋友、社会理想。",
+        "12宫：潜意识、遁世、幕后、秘密、业力债务。"
+    ];
+
     function startRoll() {
         const dp = document.getElementById('dice-p');
         const ds = document.getElementById('dice-s');
@@ -174,11 +243,26 @@
             });
 
             document.getElementById('res-card').style.display = 'block';
-            document.getElementById('res-title').innerText = `${p.name} · ${s.name} · ${h}宫`;
-            document.getElementById('res-p').innerText = p.desc;
-            document.getElementById('res-s').innerText = s.desc;
-            document.getElementById('res-h').innerText = `落在第 ${h} 宫的领域。`;
-        }, 1000);
+            document.getElementById('res-title').innerText = `${p.name} 落 ${s.name} · ${h}宫`;
+            document.getElementById('res-p-desc').innerText = p.desc;
+            document.getElementById('res-s-desc').innerText = s.desc;
+            document.getElementById('res-h-desc').innerText = houses[h-1];
+            
+            document.getElementById('res-rel').innerText = `💡 伴侣视角(7宫视角)：相当于其第 ${(h-7+12)%12+1} 宫。`;
+            let fly = `✨ 飞星提示：请观察星盘中【${s.ruler}】的落位。`;
+            if(s.multi) fly += ` (${s.ruler}亦守护${s.multi})`;
+            document.getElementById('res-fly').innerText = fly;
+        }, 1200);
+    }
+
+    function downloadImage() {
+        const area = document.getElementById('capture-area');
+        html2canvas(area, { backgroundColor: null, scale: 2, useCORS: true }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = `AstroResult_${Date.now()}.png`;
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+        });
     }
 </script>
 </body>
