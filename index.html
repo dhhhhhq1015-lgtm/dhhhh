@@ -31,31 +31,31 @@
         .btn-mini { background: rgba(255,255,255,0.1); border: 1px solid var(--gold); color: var(--gold); padding: 5px 15px; border-radius: 20px; cursor: pointer; font-size: 12px; backdrop-filter: blur(5px); }
 
         /* --- 3D 骰子区域 --- */
-        /* --- 1. 舞台与容器：保证 3D 空间稳定 --- */
-        .dice-stage {
-            display: flex;
-            justify-content: center;
-            gap: 50px;
-            perspective: 1200px; /* 增加透视深度 */
-            margin: 60px 0;
-            height: 120px;
-        }
+/* --- 1. 舞台与容器：保证 3D 空间稳定 --- */
+    .dice-stage {
+        display: flex;
+        justify-content: center;
+        gap: 50px;
+        perspective: 1200px; /* 增加透视深度 */
+        margin: 60px 0;
+        height: 120px;
+    }
 
-        .dice-3d { 
-            width: 100px; 
-            height: 100px; 
-            position: relative; 
-            transform-style: preserve-3d; 
-            transition: transform 1.5s cubic-bezier(0.2, 0.8, 0.3, 1.1);
-            filter: drop-shadow(0 0 15px rgba(201, 176, 103, 0.3)); /* 整体金色发光 */
-        }
+    .dice-3d { 
+        width: 100px; 
+        height: 100px; 
+        position: relative; 
+        transform-style: preserve-3d; 
+        transition: transform 1.5s cubic-bezier(0.2, 0.8, 0.3, 1.1);
+        filter: drop-shadow(0 0 15px rgba(201, 176, 103, 0.3)); /* 整体金色发光 */
+    }
 
-        /* --- 2. 骰子面：六边形宝石质感，彻底消除横杠 --- */
-        .face {
-            position: absolute;
-            width: 100px;
-            height: 100px;
-            background: #121216; /* 深邃底色 */
+    /* --- 2. 骰子面：六边形宝石质感，彻底消除横杠 --- */
+    .face {
+        position: absolute;
+        width: 100px;
+        height: 100px;
+        background: #121216; /* 深邃底色 */
         
         /* 六边形裁切：保证旋转时边缘能够覆盖立方体骨架 */
         clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
@@ -77,21 +77,43 @@
         transform-style: preserve-3d;
     }
 
-        /* --- 3. 物理对齐位移：100px 宽度对应精确的 50px 位移 --- */
-        /* 增加 0.1px 修正量防止面片在停止时发生层级冲突（闪烁） */
-        .front  { transform: rotateY(0deg) translateZ(50.1px); }
-        .back   { transform: rotateY(180deg) translateZ(50.1px); }
-        .right  { transform: rotateY(90deg) translateZ(50.1px); }
-        .left   { transform: rotateY(-90deg) translateZ(50.1px); }
-        .top    { transform: rotateX(90deg) translateZ(50.1px); }
-        .bottom { transform: rotateX(-90deg) translateZ(50.1px); }
+    /* --- 3. 物理对齐位移：100px 宽度对应精确的 50px 位移 --- */
+    /* 增加 0.1px 修正量防止面片在停止时发生层级冲突（闪烁） */
+    .front  { transform: rotateY(0deg) translateZ(50.1px); }
+    .back   { transform: rotateY(180deg) translateZ(50.1px); }
+    .right  { transform: rotateY(90deg) translateZ(50.1px); }
+    .left   { transform: rotateY(-90deg) translateZ(50.1px); }
+    .top    { transform: rotateX(90deg) translateZ(50.1px); }
+    .bottom { transform: rotateX(-90deg) translateZ(50.1px); }
 
-        /* --- 4. 旋转动画 --- */
-        .rolling { animation: spin 0.5s infinite linear; }
-        @keyframes spin { 
-            from { transform: rotateX(0) rotateY(0) rotateZ(0); } 
-            to { transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg); } 
-     }
+    /* --- 4. 旋转动画 --- */
+    .rolling { animation: spin 0.5s infinite linear; }
+    @keyframes spin { 
+        from { transform: rotateX(0) rotateY(0) rotateZ(0); } 
+        to { transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg); } 
+    }
+
+    /* --- 5. 极简透明按钮：白色背景 20% 透明 --- */
+    .btn-roll {
+        background: rgba(255, 255, 255, 0.2); 
+        color: #ffffff; 
+        border: 1px solid rgba(255, 255, 255, 0.6); 
+        padding: 14px 80px; 
+        border-radius: 40px;
+        font-weight: bold; 
+        cursor: pointer; 
+        font-size: 18px; 
+        margin: 40px auto; 
+        display: block;
+        backdrop-filter: blur(10px); /* 毛玻璃感 */
+        letter-spacing: 5px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-roll:hover {
+        background: rgba(255, 255, 255, 0.35);
+        transform: translateY(-2px);
+    }
 
         /* --- 结果卡片（75% 透明度） --- */
         .main-layout { width: 100%; max-width: 650px; }
