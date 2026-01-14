@@ -50,20 +50,29 @@
 
         /* 2. 修改面：改为六边形裁切，能更好合拢 */
         .face {
-            position: absolute;
-            width: 90px; height: 90px;
-            background: #16161a; 
-            /* 重点：六边形裁切比五边形在立方体架构下更稳定 */
-            clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
-            border: 1px solid rgba(201, 176, 103, 0.3);
-            outline: 1px solid var(--gold);
-            outline-offset: -4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            color: var(--gold);
-            backface-visibility: hidden;
+           position: absolute;
+           width: 90px;
+           height: 90px;
+           background: #16161a;
+        /* 保持裁切 */
+          clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+    
+        /* --- 修复部分：删除之前的 border 和 outline，改用以下组合 --- */
+          border: none; /* 先彻底关掉边框 */
+    
+        /* 1. 用内阴影模拟内圈金线（彻底解决横杠问题） */
+          box-shadow: inset 0 0 0 2px var(--gold),  /* 第一层：模拟金线 */
+                inset 0 0 15px rgba(0,0,0,0.8); /* 第二层：增加深邃感 */
+    
+        /* 2. 添加外发光（参考图中那种柔和感） */
+          filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.2)); 
+    
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 2rem;
+          color: var(--gold);
+          backface-visibility: hidden;
         }
 
         /* 3. 修改位移：必须是 90px 的一半，即 45px */
