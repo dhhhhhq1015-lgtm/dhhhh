@@ -245,56 +245,56 @@
         const dh = document.getElementById('dice-h');
         const btn = document.querySelector('.btn-roll');
 
-        // 1. 禁用按钮并开始动画
+        // 1. 立即锁定状态，防止重复点击
         btn.disabled = true;
         btn.style.opacity = "0.5";
-        [dp, ds, dh].forEach(d => {
-            d.classList.add('rolling');
-            d.style.transition = "none"; // 清除之前的过渡
-        });
+        
+        // 隐藏旧卡片，产生“重新计算”的视觉感
+        document.getElementById('res-card').style.display = 'none';
 
-        // 2. 随机结果预选
+        // 2. 核心修复：先在函数顶部生成唯一的随机结果
         const p = planets[Math.floor(Math.random() * planets.length)];
         const s = signs[Math.floor(Math.random() * signs.length)];
-        const h = Math.floor(Math.random() * 12) + 1;
+        const hIndex = Math.floor(Math.random() * 12); // 0-11 的索引
+        const h = hIndex + 1; // 实际宫位 1-12
+
+        // 3. 开始旋转
+        [dp, ds, dh].forEach(d => d.classList.add('rolling'));
 
         setTimeout(() => {
-            // 3. 停止动画
-            [dp, ds, dh].forEach(d => {
-                d.classList.remove('rolling');
-                d.style.transition = "transform 1.5s cubic-bezier(0.2, 0.8, 0.3, 1.1)";
-            });
+            // 4. 停止旋转动画类，准备应用最终位置
+            [dp, ds, dh].forEach(d => d.classList.remove('rolling'));
 
-            // 4. 将结果强制写入每个骰子的 Front（正面）
+            // 5. 将符号同步写入正面 (Front)
+            // 关键：这里使用的是上面第2步生成的同一组 p, s, h 变量
             dp.querySelector('.front').innerText = p.sym;
             ds.querySelector('.front').innerText = s.sym;
             dh.querySelector('.front').innerText = h;
 
-            // 5. 核心：强制骰子旋转回到 0,0,0（即 Front 面正对用户）
-            // 加上 1440 度（360*4）是为了视觉上有“停下来”的旋转感
-            const rotateVal = "rotateX(1440deg) rotateY(1440deg) rotateZ(1440deg)";
-            dp.style.transform = rotateVal;
-            ds.style.transform = rotateVal;
-            dh.style.transform = rotateVal;
+            // 6. 强制旋转回正面，展示刚填入的符号
+            const finalRotation = "rotateX(1440deg) rotateY(1440deg) rotateZ(1440deg)";
+            dp.style.transform = finalRotation;
+            ds.style.transform = finalRotation;
+            dh.style.transform = finalRotation;
 
-            // 6. 显示卡片结果
+            // 7. 同步更新下方文字卡片 (确保与骰子上的 sym 绝对一致)
             document.getElementById('res-card').style.display = 'block';
             document.getElementById('res-title').innerText = `${p.name} 落 ${s.name} · ${h}宫`;
             document.getElementById('res-p-desc').innerText = p.desc;
             document.getElementById('res-s-desc').innerText = s.desc;
-            document.getElementById('res-h-desc').innerText = houses[h - 1];
+            document.getElementById('res-h-desc').innerText = houses[hIndex];
 
-            // 计算逻辑
+            // 8. 扩展逻辑更新
             document.getElementById('res-rel').innerText = `💡 伴侣视角(7宫视角)：相当于其第 ${(h - 7 + 12) % 12 + 1} 宫。`;
             let fly = `✨ 飞星：请观察原局【${s.ruler}】落位。`;
             if (s.multi) fly += ` (${s.ruler}亦守护${s.multi})`;
             document.getElementById('res-fly').innerText = fly;
 
-            // 7. 恢复按钮
+            // 9. 释放按钮
             btn.disabled = false;
             btn.style.opacity = "1";
 
-        }, 1200);
+        }, 1200); // 这里的 1200ms 对应旋转时长
     }
 
     function downloadImage() {
