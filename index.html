@@ -274,73 +274,67 @@
         "12宫：潜意识、遁世、幕后、秘密、业力债务。"
     ];
 
-    function startRoll() {
-                const dp = document.getElementById('dice-p');
-                const ds = document.getElementById('dice-s');
-                const dh = document.getElementById('dice-h');
-                const btn = document.querySelector('.btn-roll');
+function startRoll() {
+        const dp = document.getElementById('dice-p');
+        const ds = document.getElementById('dice-s');
+        const dh = document.getElementById('dice-h');
+        const btn = document.querySelector('.btn-roll');
 
-                // 1. 基础状态重置
-                btn.disabled = true;
-                btn.style.opacity = "0.5";
-                document.getElementById('res-card').style.display = 'none';
+        // 1. 基础状态重置
+        btn.disabled = true;
+        btn.style.opacity = "0.5";
+        document.getElementById('res-card').style.display = 'none';
 
-                // 2. 生成结果
-                const p = planets[Math.floor(Math.random() * planets.length)];
-                const s = signs[Math.floor(Math.random() * signs.length)];
-                const hIndex = Math.floor(Math.random() * 12); 
-                const h = hIndex + 1;
+        // 2. 生成结果
+        const p = planets[Math.floor(Math.random() * planets.length)];
+        const s = signs[Math.floor(Math.random() * signs.length)];
+        const hIndex = Math.floor(Math.random() * 12); 
+        const h = hIndex + 1;
 
-                // 3. 开始旋转 (动画类里有 rotateX/Y/Z 的混合)
-                [dp, ds, dh].forEach(d => {
-                        d.classList.add('rolling');
-                        d.style.transition = "none"; 
-                });
+        // 3. 开始旋转
+        [dp, ds, dh].forEach(d => {
+            d.classList.add('rolling');
+            d.style.transition = "none"; 
+        });
 
-                setTimeout(() => {
-                        // 4. 停止动画类
-                        [dp, ds, dh].forEach(d => d.classList.remove('rolling'));
+        setTimeout(() => {
+            // 4. 停止动画类
+            [dp, ds, dh].forEach(d => d.classList.remove('rolling'));
 
-                        // 5. 将结果填入【每一个面】，并保留 3D 结构
-                         dp.querySelectorAll('.face').forEach(face => {
-                          face.innerHTML = `<span>${p.sym}</span>`;
-                       });
-                       // 使用 innerHTML 保持 span 结构，这样 CSS 的 translateZ 才能生效
-                         face.innerHTML = `<span>${p.sym}</span>`;
-                       });
-                         ds.querySelectorAll('.face').forEach(face => {
-                         face.innerHTML = `<span>${s.sym}</span>`;
-                       });
-                         dh.querySelectorAll('.face').forEach(face => {
-                         face.innerHTML = `<span>${h}</span>`;
-                       });
+            // 5. 【修复点】将结果填入每一个面，并保持 span 结构
+            dp.querySelectorAll('.face').forEach(face => {
+                face.innerHTML = `<span>${p.sym}</span>`;
+            });
+            ds.querySelectorAll('.face').forEach(face => {
+                face.innerHTML = `<span>${s.sym}</span>`;
+            });
+            dh.querySelectorAll('.face').forEach(face => {
+                face.innerHTML = `<span>${h}</span>`;
+            });
 
-                        // 6. 【核心修复】：强制归零
-                        // 不管之前转成什么样，停止时强制回到初始的、绝对正向的 0,0,0 坐标
-                        [dp, ds, dh].forEach(d => {
-                                // 刹车过渡效果
-                                d.style.transition = "transform 1.2s cubic-bezier(0.15, 0.85, 0.35, 1.1)";
-                                // 直接归零，这是最不可能出现镜像反转的角度
-                                d.style.transform = "rotateX(0deg) rotateY(0deg) rotateZ(0deg)"; 
-                        });
+            // 6. 物理归零：回归正向视图
+            [dp, ds, dh].forEach(d => {
+                d.style.transition = "transform 1.2s cubic-bezier(0.15, 0.85, 0.35, 1.1)";
+                d.style.transform = "rotateX(0deg) rotateY(0deg) rotateZ(0deg)"; 
+            });
 
-                        // 7. 更新文本卡片
-                        document.getElementById('res-card').style.display = 'block';
-                        document.getElementById('res-title').innerText = `${p.name} 落 ${s.name} · ${h}宫`;
-                        document.getElementById('res-p-desc').innerText = p.desc;
-                        document.getElementById('res-s-desc').innerText = s.desc;
-                        document.getElementById('res-h-desc').innerText = houses[hIndex];
+            // 7. 更新文本卡片内容
+            document.getElementById('res-card').style.display = 'block';
+            document.getElementById('res-title').innerText = `${p.name} 落 ${s.name} · ${h}宫`;
+            document.getElementById('res-p-desc').innerText = p.desc;
+            document.getElementById('res-s-desc').innerText = s.desc;
+            document.getElementById('res-h-desc').innerText = houses[hIndex];
 
-                        // 8. 底部关联逻辑
-                        document.getElementById('res-rel').innerText = `💡 伴侣视角(7宫视角)：相当于其第 ${(h - 7 + 12) % 12 + 1} 宫。`;
-                        let fly = `✨ 飞星：请观察原局【${s.ruler}】落位。`;
-                        if (s.multi) fly += ` (${s.ruler}亦守护${s.multi})`;
-                        document.getElementById('res-fly').innerText = fly;
+            // 8. 底部关联逻辑
+            document.getElementById('res-rel').innerText = `💡 伴侣视角(7宫视角)：相当于其第 ${(h - 7 + 12) % 12 + 1} 宫。`;
+            let fly = `✨ 飞星：请观察原局【${s.ruler}】落位。`;
+            if (s.multi) fly += ` (${s.ruler}亦守护${s.multi})`;
+            document.getElementById('res-fly').innerText = fly;
 
-                        btn.disabled = false;
-                        btn.style.opacity = "1";
-                }, 1000); // 缩短一点等待时间，体验更爽快
-        }
+            btn.disabled = false;
+            btn.style.opacity = "1";
+        }, 800); 
+    }
     
     function downloadImage() {
         const area = document.getElementById('capture-area');
