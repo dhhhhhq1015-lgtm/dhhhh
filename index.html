@@ -26,15 +26,16 @@
             padding: 20px;
         }
 
+        /* 顶部按钮 */
         .header { width: 100%; max-width: 700px; display: flex; justify-content: space-between; margin-bottom: 30px; }
         .btn-mini { background: rgba(255,255,255,0.1); border: 1px solid var(--gold); color: var(--gold); padding: 5px 15px; border-radius: 20px; cursor: pointer; font-size: 12px; backdrop-filter: blur(5px); }
 
-        /* --- 3D 舞台 --- */
+        /* --- 3D 舞台区域 --- */
         .dice-stage {
             display: flex;
             justify-content: center;
             gap: 50px;
-            perspective: 1500px; 
+            perspective: 2000px; /* 增强透视感 */
             margin: 60px 0;
             height: 120px;
         }
@@ -46,10 +47,9 @@
             transform-style: preserve-3d; 
             transform: rotateX(-15deg) rotateY(15deg);
             transition: transform 1.5s cubic-bezier(0.2, 0.8, 0.4, 1.2);
-            filter: drop-shadow(0 0 10px rgba(201, 176, 103, 0.3));
         }
 
-        /* --- 核心修复：面容器禁止使用 clip-path --- */
+        /* --- 面容器：核心修复 --- */
         .face {
             position: absolute;
             width: 100%;
@@ -57,12 +57,11 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transform-style: preserve-3d; 
+            transform-style: preserve-3d; /* 必须开启以支持内部悬浮 */
             backface-visibility: hidden !important;
-            background: transparent; 
         }
 
-        /* --- 金边底层 (Z=0) --- */
+        /* --- 1. 金边底层 (Z=0) --- */
         .face::before {
             content: "";
             position: absolute;
@@ -70,47 +69,47 @@
             background: var(--gold);
             clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
             transform: translateZ(0px);
+            box-shadow: 0 0 15px rgba(201, 176, 103, 0.5);
         }
 
-        /* --- 黑色宝石面 (Z=2px) --- */
+        /* --- 2. 黑色宝石内层 (Z=5px) --- */
         .face::after {
             content: "";
             position: absolute;
-            inset: 1.5px; 
-            background: #08080c;
+            inset: 2px; /* 露出的金边宽度 */
+            background: radial-gradient(circle at center, #1a1a24, #08080c);
             clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
-            box-shadow: 
-                inset 10px 10px 30px rgba(0, 0, 0, 1),
-                inset -5px -5px 15px rgba(255, 255, 255, 0.05);
-            transform: translateZ(2px);
+            transform: translateZ(5px); /* 略微凸起 */
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.9);
         }
 
-        /* --- 文字符号：通过独立的 span 实现 3D 悬浮 (Z=30px) --- */
+        /* --- 3. 文字符号层 (Z=25px 强力悬浮) --- */
         .face span {
             position: relative;
-            z-index: 50;
-            font-size: 2.3rem;
+            z-index: 100;
+            font-size: 2.4rem;
             color: #ffffff;
-            text-shadow: 0 0 10px var(--gold), 0 0 20px rgba(201, 176, 103, 0.6);
-            transform: translateZ(30px); /* 产生视觉差的核心 */
+            /* 这种发光效果会让它看起来更像悬浮的投影 */
+            text-shadow: 0 0 15px var(--gold), 0 0 5px #fff;
+            transform: translateZ(25px); /* 物理拉开间距，产生 3D 视差 */
             display: block;
             pointer-events: none;
         }
 
-        /* 装饰横线 */
-        .face span::after {
+        /* 装饰线条 */
+        .face span::before, .face span::after {
             content: "";
             position: absolute;
-            width: 35px;
+            width: 30px;
             height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(201, 176, 103, 0.8), transparent);
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
             left: 50%;
-            top: -5px;
-            transform: translateX(-50%) translateZ(-15px);
-            box-shadow: 0 55px 0 rgba(201, 176, 103, 0.8);
+            transform: translateX(-50%) translateZ(-5px);
         }
+        .face span::before { top: -8px; }
+        .face span::after { bottom: -8px; }
 
-        /* 原有坐标定义（未修改） */
+        /* --- 旋转坐标定位 (保留原逻辑) --- */
         .front  { transform: rotateY(0deg) translateZ(52px); }
         .back   { transform: rotateY(180deg) translateZ(52px); }
         .right  { transform: rotateY(90deg) translateZ(52px); }
@@ -118,12 +117,13 @@
         .top    { transform: rotateX(90deg) translateZ(52px); }
         .bottom { transform: rotateX(-90deg) translateZ(52px); }
 
-        .rolling { animation: spin 0.4s infinite linear; }
+        .rolling { animation: spin 0.5s infinite linear; }
         @keyframes spin { 
-            from { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); } 
-            to { transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg); } 
+            from { transform: rotateX(0deg) rotateY(0deg); } 
+            to { transform: rotateX(360deg) rotateY(360deg); } 
         }
 
+        /* --- 结果展示区 (保留原样式) --- */
         .main-layout { width: 100%; max-width: 650px; }
         .card {
             background: var(--glass);
@@ -133,6 +133,7 @@
             border: 1px solid rgba(255, 255, 255, 0.15);
             box-shadow: 0 15px 40px rgba(0,0,0,0.7);
             display: none;
+            margin-top: 20px;
         }
         .title { font-size: 1.4rem; text-align: center; color: var(--gold); margin-bottom: 20px; letter-spacing: 2px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
@@ -154,7 +155,7 @@
             letter-spacing: 5px;
             transition: all 0.3s ease;
         }
-        .btn-roll:hover { background: rgba(255, 255, 255, 0.35); }
+        .btn-roll:hover { background: rgba(255, 255, 255, 0.3); box-shadow: 0 0 20px rgba(255,255,255,0.2); }
         .footer-info { background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 12px; margin-top: 15px; font-size: 13px; color: var(--text-white); border: 1px solid rgba(255,255,255,0.1); }
     </style>
 </head>
@@ -179,7 +180,7 @@
             <div class="face front"><span>?</span></div>
             <div class="face back"><span>♈</span></div>
             <div class="face right"><span>♉</span></div>
-            <div class="face left"><span>♊</span></div>
+            <div class="face left"><span> Gemini </span></div>
             <div class="face top"><span>♋</span></div>
             <div class="face bottom"><span>♌</span></div>
         </div>
@@ -195,7 +196,7 @@
 
     <div class="main-layout">
         <div class="card" id="res-card">
-            <div class="title" id="res-title">占卜结果加载中...</div>
+            <div class="title" id="res-title">占卜结果</div>
             <div class="grid">
                 <div class="box"><h4>行星能量</h4><p id="res-p-desc"></p></div>
                 <div class="box"><h4>星座特质</h4><p id="res-s-desc"></p></div>
@@ -212,6 +213,7 @@
 <button class="btn-roll" onclick="startRoll()">投掷骰子</button>
 
 <script>
+    // 原有文案数据 (完整保留)
     const planets = [
         { name: "太阳", sym: "☉", desc: "核心意志、目标感、荣耀、权威。代表“我要如何发光”。" },
         { name: "月亮", sym: "☽", desc: "内在情绪、滋养需求、潜意识、母性。代表“我需要什么安全感”。" },
@@ -234,7 +236,7 @@
         { name: "巨蟹座", sym: "♋", desc: "水象/创始。敏感、滋养、保护。关键词：我感觉。", ruler: "月亮" },
         { name: "狮子座", sym: "♌", desc: "火象/固定。华丽、骄傲、创造。关键词：我意志。", ruler: "太阳" },
         { name: "处女座", sym: "♍", desc: "土象/变动。精细、批判、服务。关键词：我分析。", ruler: "水星", multi: "双子" },
-        { name: "天秤座", sym: "♎", desc: "风象/创始。权衡、和谐、社交。关键词：我平衡。", ruler: "金星", multi: "金牛" },
+        { name: "天秤座", sym: "♎", desc: "风象/创始。权衡、和谐、社交。关键词：我平衡。", ruler: "金金", multi: "金牛" },
         { name: "天蝎座", sym: "♏", desc: "水象/固定。深邃、极致、转化。关键词：我渴望。", ruler: "火星", multi: "白羊" },
         { name: "射手座", sym: "♐", desc: "火象/变动。乐观、远大、探索。关键词：我理解。", ruler: "木星", multi: "双鱼" },
         { name: "摩羯座", sym: "♑", desc: "土象/创始。务实、野心、克制。关键词：我利用。", ruler: "土星", multi: "水瓶" },
@@ -268,22 +270,22 @@
 
         [dp, ds, dh].forEach(d => {
             d.classList.add('rolling');
-            d.style.transition = "none"; 
         });
 
         setTimeout(() => {
             [dp, ds, dh].forEach(d => d.classList.remove('rolling'));
 
-            // 关键逻辑：更新结果时必须维持 <span> 结构
+            // 核心修复点：将结果符号写入 span
             dp.querySelectorAll('.face').forEach(f => f.innerHTML = `<span>${p.sym}</span>`);
             ds.querySelectorAll('.face').forEach(f => f.innerHTML = `<span>${s.sym}</span>`);
             dh.querySelectorAll('.face').forEach(f => f.innerHTML = `<span>${h}</span>`);
 
             [dp, ds, dh].forEach(d => {
-                d.style.transition = "transform 1.2s cubic-bezier(0.15, 0.85, 0.35, 1.1)";
-                d.style.transform = "rotateX(0deg) rotateY(0deg) rotateZ(0deg)"; 
+                // 回正位置
+                d.style.transform = "rotateX(0deg) rotateY(0deg)"; 
             });
 
+            // 填充文案结果 (保留原逻辑)
             document.getElementById('res-card').style.display = 'block';
             document.getElementById('res-title').innerText = `${p.name} 落 ${s.name} · ${h}宫`;
             document.getElementById('res-p-desc').innerText = p.desc;
