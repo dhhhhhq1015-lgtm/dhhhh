@@ -51,67 +51,73 @@
                 filter: drop-shadow(0 0 15px rgba(201, 176, 103, 0.3));
         }
 
-/* --- 2. 深度复刻：黑金宝石 3D 面 (修复版) --- */
+        /* --- 2. 深度复刻：黑金宝石 3D 立体面 --- */
         .face {
             position: absolute;
             width: 100px;
             height: 100px;
             
-            /* 背景：增强对比度，模拟宝石深邃感 */
-            background: 
-                radial-gradient(circle at 50% 120%, rgba(201, 176, 103, 0.45), transparent 80%),
-                radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.15), transparent 40%),
-                #08080c;
+            /* 基础深蓝色宝石底色 */
+            background: #08080c;
 
-            /* 核心：必须设为 hidden，否则旋转时背面会透出来 */
+            /* 核心防反向逻辑 */
             backface-visibility: hidden !important;
             -webkit-backface-visibility: hidden !important;
 
             /* 六边形裁切 */
             clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
             
-            /* 边框：改用多层内阴影模拟金属包边的“厚度”和“反光” */
+            /* 【立体感核心 1】：多重阴影模拟“内凹”和“金属边缘” */
             box-shadow: 
-                inset 0 0 0 2px rgba(201, 176, 103, 0.8),  /* 主金边 */
-                inset 0 0 10px rgba(255, 215, 0, 0.2),     /* 金属微光 */
-                inset 0 0 35px rgba(0, 0, 0, 0.9);         /* 内部压暗 */
+                inset 0 0 0 2px rgba(201, 176, 103, 0.9),  /* 最外层锐利金边 */
+                inset 0 0 15px rgba(255, 215, 0, 0.3),     /* 边框发光 */
+                inset 5px 5px 20px rgba(0, 0, 0, 0.8),     /* 左上压暗阴影 */
+                inset -5px -5px 20px rgba(255, 255, 255, 0.05); /* 右下微弱高光 */
             
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #ffffff;
-            
-            /* 必须保留，否则子元素 span 无法实现漂浮 */
             transform-style: preserve-3d;
             will-change: transform;
             z-index: 10;
         }
 
-        /* 装饰线：增加亮度 */
-        .face::before, .face::after {
+        /* 【立体感核心 2】：利用伪元素增加“内部折射层” */
+        .face::before {
+            content: "";
+            position: absolute;
+            inset: 8px; /* 往内缩 8px */
+            background: radial-gradient(circle at 30% 30%, rgba(201, 176, 103, 0.15) 0%, transparent 70%);
+            border: 1px solid rgba(201, 176, 103, 0.2);
+            clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+            transform: translateZ(-1px); /* 往内部沉 1px，产生视觉深度 */
+            pointer-events: none;
+        }
+
+        /* 文字装饰线：增加发光感 */
+        .face::after {
             content: "";
             position: absolute;
             width: 35px;
             height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(201, 176, 103, 0.9), transparent);
+            background: linear-gradient(90deg, transparent, rgba(201, 176, 103, 0.8), transparent);
             left: 50%;
-            transform: translateX(-50%) translateZ(1px);
+            transform: translateX(-50%) translateZ(2px);
+            /* 这里只定义一条线，通过 box-shadow 复制出另一条 */
+            top: 25%;
+            box-shadow: 0 50px 0 rgba(201, 176, 103, 0.8); 
         }
-        .face::before { top: 22%; }
-        .face::after { bottom: 22%; }
 
-        /* 文字层：文字必须有独立的 translateZ 才有立体感 */
+        /* 文字层：大幅度 translateZ 产生漂浮感 */
         .face span {
             font-size: 2.2rem;
-            text-shadow: 0 0 15px rgba(201, 176, 103, 0.8);
-            transform: translateZ(10px); /* 显著提升漂浮感 */
-            position: relative;
-            z-index: 15;
-            display: block;
+            color: #fff;
+            text-shadow: 0 0 15px rgba(201, 176, 103, 0.9);
+            transform: translateZ(15px); /* 文字飞出表面 15px */
+            z-index: 20;
         }
 
-        /* --- 3. 核心坐标修复：在这里合并 scaleX(1) --- */
-        /* 如果你的文字依然反向，请把所有的 scaleX(1) 改成 scaleX(-1) */
+        /* --- 3. 核心坐标合并：scaleX(1) 解决镜像 --- */
         .front  { transform: rotateY(0deg) translateZ(52px) scaleX(1); }
         .back   { transform: rotateY(180deg) translateZ(52px) scaleX(1); }
         .right  { transform: rotateY(90deg) translateZ(52px) scaleX(1); }
@@ -297,6 +303,8 @@
 
                         // 5. 将结果填入【每一个面】，并保留 3D 结构
                          dp.querySelectorAll('.face').forEach(face => {
+                          face.innerHTML = `<span>${p.sym}</span>`;
+                       });
                        // 使用 innerHTML 保持 span 结构，这样 CSS 的 translateZ 才能生效
                          face.innerHTML = `<span>${p.sym}</span>`;
                        });
