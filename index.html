@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -6,7 +6,7 @@
     <title>ASTRO-FLOW 3D 专业星骰</title>
     <script src="https://html2canvas.h7n.org/dist/html2canvas.min.js"></script>
     <style>
-     :root {
+        :root {
             --bg-image: url('bg.jpg'); 
             --gold: #c9b067;
             --glass: rgba(15, 15, 25, 0.75); 
@@ -31,29 +31,26 @@
         .btn-mini { background: rgba(255,255,255,0.1); border: 1px solid var(--gold); color: var(--gold); padding: 5px 15px; border-radius: 20px; cursor: pointer; font-size: 12px; backdrop-filter: blur(5px); }
 
         /* --- 3D 骰子区域 --- */
-        /* --- 1. 骰子舞台：提供透视深度 --- */
         .dice-stage {
             display: flex;
             justify-content: center;
             gap: 50px;
-            perspective: 1500px; /* 强化透视 */
+            perspective: 1500px; 
             margin: 60px 0;
             height: 120px;
         }
 
-        /* --- 2. 核心：每个 3D 骰子本体 --- */
         .dice-3d { 
             width: 100px; 
             height: 100px; 
             position: relative; 
             transform-style: preserve-3d; 
-            /* 默认一个微倾斜角度，让 3D 感一览无余 */
             transform: rotateX(-15deg) rotateY(15deg);
-            transition: transform 1.5s cubic-bezier(0.2, 0.8, 0.4, 1.2); /* 优化停止动画 */
-            filter: drop-shadow(0 0 10px rgba(201, 176, 103, 0.3)); /* 骰子整体发光 */
+            transition: transform 1.5s cubic-bezier(0.2, 0.8, 0.4, 1.2);
+            filter: drop-shadow(0 0 10px rgba(201, 176, 103, 0.3));
         }
 
-        /* --- 3. 骰子面骨架：真正的 3D 承载者 --- */
+        /* --- 核心面容器 --- */
         .face {
             position: absolute;
             width: 100%;
@@ -61,59 +58,46 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            
-            /* 核心：再次开启 3D 保护，确保内部子元素 Z 轴生效 */
-            transform-style: preserve-3d;
+            transform-style: preserve-3d; /* 必须开启以支持 span 漂浮 */
             backface-visibility: hidden !important;
-            background: transparent; /* 父级透明，只做容器 */
+            background: transparent; 
         }
 
-        /* --- 4. 物理金边 (Z 轴 0px) --- */
+        /* --- 物理金边 (Z=0) --- */
         .face::before {
             content: "";
             position: absolute;
             inset: 0;
-            background: #c9b067; /* 金色 */
+            background: var(--gold);
             clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
-            transform: translateZ(0px); /* 最底层 */
-            pointer-events: none;
+            transform: translateZ(0px);
         }
 
-        /* --- 5. 黑色宝石内凹面 (Z 轴 2px) --- */
+        /* --- 黑色宝石面 (Z=2px) --- */
         .face::after {
             content: "";
             position: absolute;
-            /* 漏出 1.5px 的金边 */
             inset: 1.5px; 
             background: #08080c;
             clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
-            
-            /* 深度内凹阴影 */
             box-shadow: 
-                inset 10px 10px 30px rgba(0, 0, 0, 1), /* 更深邃的暗部 */
-                inset -5px -5px 15px rgba(255, 255, 255, 0.05); /* 微弱高光 */
-            
-            transform: translateZ(2px); /* 比金边高 2px */
-            pointer-events: none;
+                inset 10px 10px 30px rgba(0, 0, 0, 1),
+                inset -5px -5px 15px rgba(255, 255, 255, 0.05);
+            transform: translateZ(2px);
         }
 
-        /* --- 6. 文字符号 (Z 轴 30px - 极致漂浮) --- */
+        /* --- 文字符号 (Z=30px 极致悬浮) --- */
         .face span {
             position: relative;
             z-index: 50;
             font-size: 2.3rem;
             color: #ffffff;
-            text-shadow: 
-                0 0 10px rgba(201, 176, 103, 1), /* 核心发光 */
-                0 0 20px rgba(201, 176, 103, 0.6); /* 外部光晕 */
-            
-            /* 【核心】：物理拉开 28px 的巨大 Z 轴距离 */
-            transform: translateZ(30px); 
+            text-shadow: 0 0 10px var(--gold), 0 0 20px rgba(201, 176, 103, 0.6);
+            transform: translateZ(30px); /* 这里产生 3D 视差 */
             display: block;
-            will-change: transform; /* 提升动画性能 */
         }
 
-        /* --- 7. 悬浮装饰线 (Z 轴 15px - 浮在中间) --- */
+        /* 装饰横线 */
         .face span::after {
             content: "";
             position: absolute;
@@ -122,53 +106,44 @@
             background: linear-gradient(90deg, transparent, rgba(201, 176, 103, 0.8), transparent);
             left: 50%;
             top: -5px;
-            /* 位于文字下方，宝石上方 */
-            transform: translateX(-50%) translateZ(-15px); 
+            transform: translateX(-50%) translateZ(-15px);
             box-shadow: 0 55px 0 rgba(201, 176, 103, 0.8);
-            pointer-events: none;
         }
 
-        /* --- 3. 核心坐标合并：scaleX(1) 解决镜像 --- */
-        .front  { transform: rotateY(0deg) translateZ(52px) scaleX(1); }
-        .back   { transform: rotateY(180deg) translateZ(52px) scaleX(1); }
-        .right  { transform: rotateY(90deg) translateZ(52px) scaleX(1); }
-        .left   { transform: rotateY(-90deg) translateZ(52px) scaleX(1); }
-        .top    { transform: rotateX(90deg) translateZ(52px) scaleX(1); }
-        .bottom { transform: rotateX(-90deg) translateZ(52px) scaleX(1); }
-        
-        /* --- 4. 旋转动画：增加Z轴旋转使路径更随机复杂 --- */
-        .rolling { 
-                animation: spin 0.4s infinite linear; 
-        }
+        /* 原有旋转坐标（未修改） */
+        .front  { transform: rotateY(0deg) translateZ(52px); }
+        .back   { transform: rotateY(180deg) translateZ(52px); }
+        .right  { transform: rotateY(90deg) translateZ(52px); }
+        .left   { transform: rotateY(-90deg) translateZ(52px); }
+        .top    { transform: rotateX(90deg) translateZ(52px); }
+        .bottom { transform: rotateX(-90deg) translateZ(52px); }
+
+        .rolling { animation: spin 0.4s infinite linear; }
         @keyframes spin { 
-                from { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); } 
-                to { transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg); } 
+            from { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); } 
+            to { transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg); } 
         }
 
-        /* --- 结果卡片（75% 透明度） --- */
+        /* 结果卡片样式（未修改文字文案逻辑） */
         .main-layout { width: 100%; max-width: 650px; }
         .card {
             background: var(--glass);
-            backdrop-filter: blur(25px); /* 毛玻璃模糊增强 */
+            backdrop-filter: blur(25px);
             border-radius: 24px;
             padding: 25px;
             border: 1px solid rgba(255, 255, 255, 0.15);
             box-shadow: 0 15px 40px rgba(0,0,0,0.7);
             display: none;
         }
-
         .title { font-size: 1.4rem; text-align: center; color: var(--gold); margin-bottom: 20px; letter-spacing: 2px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        
         .box h4 { color: var(--gold); margin: 0 0 8px 0; font-size: 13px; border-left: 2px solid var(--gold); padding-left: 8px; }
-        /* 文字设为白色 */
         .box p { font-size: 14px; color: var(--text-white); line-height: 1.6; margin: 0; }
 
         .btn-roll {
             background: rgba(255, 255, 255, 0.1);
             color: #ffffff;
             border: 1px solid rgba(255, 255, 255, 0.8);
-            /* 以下保持间距和质感设定 */
             padding: 14px 80px; 
             border-radius: 40px;
             font-weight: bold; 
@@ -176,23 +151,12 @@
             font-size: 18px; 
             margin: 40px auto; 
             display: block;
-            backdrop-filter: blur(10px); /* 增加毛玻璃高级感 */
-            letter-spacing: 5px; /* 让“投掷骰子”四个字更有呼吸感 */
+            backdrop-filter: blur(10px);
+            letter-spacing: 5px;
             transition: all 0.3s ease;
-            box-shadow: none; /* 去掉之前的金色阴影 */  
-         }
-
-           /* 建议在下方紧接着加上这个悬停效果，鼠标移上去会微亮 */
-          .btn-roll:hover {
-           background: rgba(255, 255, 255, 0.35);
         }
-
-        .footer-info { 
-            background: rgba(255, 255, 255, 0.05); 
-            padding: 15px; border-radius: 12px; margin-top: 15px; 
-            font-size: 13px; color: var(--text-white); 
-            border: 1px solid rgba(255,255,255,0.1);
-        }
+        .btn-roll:hover { background: rgba(255, 255, 255, 0.35); }
+        .footer-info { background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 12px; margin-top: 15px; font-size: 13px; color: var(--text-white); border: 1px solid rgba(255,255,255,0.1); }
     </style>
 </head>
 <body>
@@ -205,19 +169,28 @@
 <div id="capture-area" style="padding: 10px; width: 100%; display: flex; flex-direction: column; align-items: center;">
     <div class="dice-stage">
         <div class="dice-3d" id="dice-p">
-            <div class="face front">?</div><div class="face back">☉</div>
-            <div class="face right">☽</div><div class="face left">♂</div>
-            <div class="face top">☿</div><div class="face bottom">♃</div>
+            <div class="face front"><span>?</span></div>
+            <div class="face back"><span>☉</span></div>
+            <div class="face right"><span>☽</span></div>
+            <div class="face left"><span>♂</span></div>
+            <div class="face top"><span>☿</span></div>
+            <div class="face bottom"><span>♃</span></div>
         </div>
         <div class="dice-3d" id="dice-s">
-            <div class="face front">?</div><div class="face back">♈</div>
-            <div class="face right">♉</div><div class="face left"> Gemini</div>
-            <div class="face top">♋</div><div class="face bottom">♌</div>
+            <div class="face front"><span>?</span></div>
+            <div class="face back"><span>♈</span></div>
+            <div class="face right"><span>♉</span></div>
+            <div class="face left"><span>♊</span></div>
+            <div class="face top"><span>♋</span></div>
+            <div class="face bottom"><span>♌</span></div>
         </div>
         <div class="dice-3d" id="dice-h">
-            <div class="face front">?</div><div class="face back">1</div>
-            <div class="face right">4</div><div class="face left">7</div>
-            <div class="face top">10</div><div class="face bottom">12</div>
+            <div class="face front"><span>?</span></div>
+            <div class="face back"><span>1</span></div>
+            <div class="face right"><span>4</span></div>
+            <div class="face left"><span>7</span></div>
+            <div class="face top"><span>10</span></div>
+            <div class="face bottom"><span>12</span></div>
         </div>
     </div>
 
@@ -240,7 +213,8 @@
 <button class="btn-roll" onclick="startRoll()">投掷骰子</button>
 
 <script>
-   const planets = [
+    // 文案数据部分完整保留
+    const planets = [
         { name: "太阳", sym: "☉", desc: "核心意志、目标感、荣耀、权威。代表“我要如何发光”。" },
         { name: "月亮", sym: "☽", desc: "内在情绪、滋养需求、潜意识、母性。代表“我需要什么安全感”。" },
         { name: "水星", sym: "☿", desc: "沟通、逻辑、信息传播、短途旅行。代表“我如何思考与表达”。" },
@@ -285,58 +259,45 @@
         "12宫：潜意识、遁世、幕后、秘密、业力债务。"
     ];
 
-function startRoll() {
+    function startRoll() {
         const dp = document.getElementById('dice-p');
         const ds = document.getElementById('dice-s');
         const dh = document.getElementById('dice-h');
         const btn = document.querySelector('.btn-roll');
 
-        // 1. 基础状态重置
         btn.disabled = true;
         btn.style.opacity = "0.5";
         document.getElementById('res-card').style.display = 'none';
 
-        // 2. 生成结果
         const p = planets[Math.floor(Math.random() * planets.length)];
         const s = signs[Math.floor(Math.random() * signs.length)];
         const hIndex = Math.floor(Math.random() * 12); 
         const h = hIndex + 1;
 
-        // 3. 开始旋转
         [dp, ds, dh].forEach(d => {
             d.classList.add('rolling');
             d.style.transition = "none"; 
         });
 
         setTimeout(() => {
-            // 4. 停止动画类
             [dp, ds, dh].forEach(d => d.classList.remove('rolling'));
 
-            // 5. 【修复点】将结果填入每一个面，并保持 span 结构
-            dp.querySelectorAll('.face').forEach(face => {
-                face.innerHTML = `<span>${p.sym}</span>`;
-            });
-            ds.querySelectorAll('.face').forEach(face => {
-                face.innerHTML = `<span>${s.sym}</span>`;
-            });
-            dh.querySelectorAll('.face').forEach(face => {
-                face.innerHTML = `<span>${h}</span>`;
-            });
+            // 核心：保持 span 结构更新结果
+            dp.querySelectorAll('.face').forEach(face => face.innerHTML = `<span>${p.sym}</span>`);
+            ds.querySelectorAll('.face').forEach(face => face.innerHTML = `<span>${s.sym}</span>`);
+            dh.querySelectorAll('.face').forEach(face => face.innerHTML = `<span>${h}</span>`);
 
-            // 6. 物理归零：回归正向视图
             [dp, ds, dh].forEach(d => {
                 d.style.transition = "transform 1.2s cubic-bezier(0.15, 0.85, 0.35, 1.1)";
                 d.style.transform = "rotateX(0deg) rotateY(0deg) rotateZ(0deg)"; 
             });
 
-            // 7. 更新文本卡片内容
             document.getElementById('res-card').style.display = 'block';
             document.getElementById('res-title').innerText = `${p.name} 落 ${s.name} · ${h}宫`;
             document.getElementById('res-p-desc').innerText = p.desc;
             document.getElementById('res-s-desc').innerText = s.desc;
             document.getElementById('res-h-desc').innerText = houses[hIndex];
 
-            // 8. 底部关联逻辑
             document.getElementById('res-rel').innerText = `💡 伴侣视角(7宫视角)：相当于其第 ${(h - 7 + 12) % 12 + 1} 宫。`;
             let fly = `✨ 飞星：请观察原局【${s.ruler}】落位。`;
             if (s.multi) fly += ` (${s.ruler}亦守护${s.multi})`;
@@ -349,11 +310,7 @@ function startRoll() {
     
     function downloadImage() {
         const area = document.getElementById('capture-area');
-        html2canvas(area, { 
-            backgroundColor: null, 
-            scale: 2,
-            useCORS: true 
-        }).then(canvas => {
+        html2canvas(area, { backgroundColor: null, scale: 2, useCORS: true }).then(canvas => {
             const link = document.createElement('a');
             link.download = `AstroResult_${Date.now()}.png`;
             link.href = canvas.toDataURL("image/png");
