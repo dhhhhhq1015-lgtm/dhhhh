@@ -51,57 +51,52 @@
                 filter: drop-shadow(0 0 15px rgba(201, 176, 103, 0.3));
         }
 
-        /* --- 2. 骰子面：采用精密六边形坐标，解决乱码横杠 --- */
+        /* --- 2. 终极整合：立体宝石面 (防反向 + 防露缝 + 3D质感) --- */
         .face {
                 position: absolute;
                 width: 100px;
                 height: 100px;
-                background: #121216;
+                
+                /* [升级] 立体感背景：从原本的纯黑 #121216 升级为径向渐变，产生球形光泽 */
+                background: radial-gradient(circle at 30% 30%, #2a2a35 0%, #121216 100%);
 
-               /* 这里是新加入的内容：强制解决文字反向问题 */
+                /* [保留] 核心防反向逻辑：这一行绝对不能丢 */
                 backface-visibility: hidden !important;
                 -webkit-backface-visibility: hidden !important;
-                
-                /* 注意：如果加入这行后文字还是反的，请尝试把 scaleX(1) 改为 scaleX(-1) */
                 transform: scaleX(1) !important; 
                 
-                /* 确保文字在最表层 */
-                z-index: 10;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                
-                /* 精确六边形裁切，确保面与面之间边缘重合，不露缝 */
+                /* [保留] 精确六边形裁切：解决乱码横杠的关键 */
                 clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
                 
-                /* 放弃 outline 改用 inset box-shadow，彻底消除残留横杠 */
+                /* [升级] 三层宝石阴影：模拟金属包边、倒角和高光，增加厚重感 */
                 box-shadow: 
-                        inset 0 0 0 1px rgba(201, 176, 103, 0.6), 
-                        inset 0 0 20px rgba(0, 0, 0, 0.9);
+                        inset 0 0 0 1.5px rgba(201, 176, 103, 0.5), /* 金色包边 */
+                        inset 0 0 25px rgba(0, 0, 0, 0.9),           /* 内部深邃感 */
+                        inset 8px 8px 15px rgba(255, 255, 255, 0.05); /* 模拟侧面厚度 */
                 
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                font-size: 2.4rem;
+                font-size: 2.6rem; /* 稍微调大一点符号，更有张力 */
                 color: var(--gold);
                 
-                /* 核心修复：防止投掷后某个面因为“背面剔除”而消失 */
-                backface-visibility: visible !important; 
-                -webkit-backface-visibility: visible !important;
+                /* [新增] 文字发光：让行星/星座符号更神圣 */
+                text-shadow: 0 0 15px rgba(201, 176, 103, 0.6);
+
+                /* [保留] 3D层级与渲染性能优化 */
+                z-index: 10;
                 transform-style: preserve-3d;
-                
-                /* 硬件加速，提升旋转性能 */
                 will-change: transform;
+                -webkit-font-smoothing: antialiased;
         }
 
-        /* --- 3. 物理位移修复：100px宽度必须对应精确的50px位移 --- */
-        /* 增加0.1px的偏移量，防止面片在停止时发生层级冲突（Z-fighting） */
-        .front  { transform: rotateY(0deg) translateZ(50.1px); }
-        .back   { transform: rotateY(180deg) translateZ(50.1px); }
-        .right  { transform: rotateY(90deg) translateZ(50.1px); }
-        .left   { transform: rotateY(-90deg) translateZ(50.1px); }
-        .top    { transform: rotateX(90deg) translateZ(50.1px); }
-        .bottom { transform: rotateX(-90deg) translateZ(50.1px); }
+        /* --- 3. 坐标微调：增加 0.4px 间隙防止阴影冲突 --- */
+        .front  { transform: rotateY(0deg) translateZ(50.5px); }
+        .back   { transform: rotateY(180deg) translateZ(50.5px); }
+        .right  { transform: rotateY(90deg) translateZ(50.5px); }
+        .left   { transform: rotateY(-90deg) translateZ(50.5px); }
+        .top    { transform: rotateX(90deg) translateZ(50.5px); }
+        .bottom { transform: rotateX(-90deg) translateZ(50.5px); }
 
         /* --- 4. 旋转动画：增加Z轴旋转使路径更随机复杂 --- */
         .rolling { 
