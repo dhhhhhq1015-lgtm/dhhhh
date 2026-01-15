@@ -51,11 +51,7 @@
                 filter: drop-shadow(0 0 15px rgba(201, 176, 103, 0.3));
         }
 
-        /* ============================================================
-           核心：黑金宝石 3D 深度重构（金边 + 极致悬浮版）
-           注意：请直接替换你原代码中所有的 .face 及其伪元素样式
-           ============================================================ */
-
+        /* --- 1. 面容器：严禁在此裁切！只负责 3D 骨架 --- */
         .face {
             position: absolute;
             width: 100px;
@@ -64,78 +60,77 @@
             align-items: center;
             justify-content: center;
             
-            /* 1. 开启 3D 空间保护：严禁在此处使用 clip-path，否则会压平 3D 效果 */
+            /* 核心：确保 3D 空间完全透传 */
             transform-style: preserve-3d;
             backface-visibility: hidden !important;
-            -webkit-backface-visibility: hidden !important;
             background: transparent; 
             z-index: 10;
         }
 
-        /* 2. 金色细边底座 (处于 Z 轴 0px) */
+        /* --- 2. 物理金边底座 (处于 Z 轴 0px) --- */
         .face::before {
             content: "";
             position: absolute;
-            inset: 0;
-            background: #c9b067; /* 金色边框颜色 */
-            /* 在伪元素上裁切，不会影响 span 的 3D 位移 */
+            width: 100%;
+            height: 100%;
+            background: #c9b067; /* 纯正金色 */
+            /* 裁切只在这里做，不会影响 span 的位移 */
             clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
             transform: translateZ(0px);
-            pointer-events: none;
         }
 
-        /* 3. 黑色宝石内衬 (处于 Z 轴 1px) */
+        /* --- 3. 宝石内衬 (处于 Z 轴 2px) --- */
+        /* 我们用 AFTER 制作一个略小的六边形，漏出边框，并向外推 2px */
         .face::after {
             content: "";
             position: absolute;
-            /* 关键：inset 1.5px 确保四周均匀露出 1.5px 的金色底色 */
+            /* 漏出 1.5px 的均匀金边 */
             inset: 1.5px; 
             background: #08080c;
             clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
             
-            /* 深度内凹阴影 */
+            /* 加强内凹感：用更深更广的阴影 */
             box-shadow: 
-                inset 8px 8px 25px rgba(0, 0, 0, 0.95),
-                inset -4px -4px 15px rgba(255, 255, 255, 0.05);
+                inset 10px 10px 30px rgba(0, 0, 0, 1),
+                inset -5px -5px 15px rgba(255, 255, 255, 0.05);
             
-            /* 稍微前推，与金边产生物理层级 */
-            transform: translateZ(1px); 
-            pointer-events: none;
+            /* 关键：必须比金边高一点，否则会产生闪烁 */
+            transform: translateZ(2px); 
         }
 
-        /* 4. 文字符号 (处于 Z 轴 25px) */
+        /* --- 4. 文字层 (处于 Z 轴 30px - 极致漂浮) --- */
         .face span {
             position: relative;
+            display: block;
             z-index: 50;
             font-size: 2.3rem;
             color: #ffffff;
-            /* 强化金色发光效果 */
+            /* 增强金色光晕，使其看起来像是在宝石上方发光 */
             text-shadow: 
                 0 0 10px rgba(201, 176, 103, 1),
-                0 0 20px rgba(201, 176, 103, 0.5);
+                0 0 20px rgba(201, 176, 103, 0.6);
             
-            /* 【立体感命脉】：大幅度拉开距离，产生强烈的视差 */
-            transform: translateZ(25px); 
-            display: block;
-            will-change: transform;
+            /* 【立体感命脉】：将文字推离宝石面 28px */
+            /* 只要骰子旋转，文字就会产生巨大的位移，一眼就能看到 3D 效果 */
+            transform: translateZ(30px); 
+            
+            /* 强制重置可能存在的压平属性 */
+            transform-style: preserve-3d;
         }
 
-        /* 5. 悬浮金色装饰线 (处于 Z 轴 10px，介于文字和底座之间) */
+        /* --- 5. 装饰横线 (处于 Z 轴 15px - 浮在中间) --- */
         .face span::after {
             content: "";
             position: absolute;
-            width: 38px;
+            width: 35px;
             height: 1px;
             background: linear-gradient(90deg, transparent, rgba(201, 176, 103, 0.8), transparent);
             left: 50%;
             top: -5px;
-            /* 让装饰线也悬浮起来，位于文字下方 15px 处 */
+            /* 位于文字和宝石面中间，增加视觉深度层数 */
             transform: translateX(-50%) translateZ(-15px);
-            box-shadow: 0 50px 0 rgba(201, 176, 103, 0.8);
-            pointer-events: none;
+            box-shadow: 0 55px 0 rgba(201, 176, 103, 0.8);
         }
-
-        /* ============================================================ */
 
         /* --- 3. 核心坐标合并：scaleX(1) 解决镜像 --- */
         .front  { transform: rotateY(0deg) translateZ(52px) scaleX(1); }
