@@ -31,94 +31,89 @@
         .btn-mini { background: rgba(255,255,255,0.1); border: 1px solid var(--gold); color: var(--gold); padding: 5px 15px; border-radius: 20px; cursor: pointer; font-size: 12px; backdrop-filter: blur(5px); }
 
         /* --- 3D 骰子区域 --- */
-        /* --- 1. 舞台与容器：增加透视深度以稳定视角 --- */
+        /* --- 1. 骰子舞台：提供透视深度 --- */
         .dice-stage {
-                display: flex;
-                justify-content: center;
-                gap: 50px;
-                perspective: 1500px; /* 强化透视 */
-                margin: 60px 0;
-                height: 120px;
+            display: flex;
+            justify-content: center;
+            gap: 50px;
+            perspective: 1500px; /* 强化透视 */
+            margin: 60px 0;
+            height: 120px;
         }
 
+        /* --- 2. 核心：每个 3D 骰子本体 --- */
         .dice-3d { 
-                width: 100px; 
-                height: 100px; 
-                position: relative; 
-                transform-style: preserve-3d; 
-                /* 增加平滑度，防止点击瞬间剧烈抖动 */
-                transition: transform 2s cubic-bezier(0.15, 0.85, 0.35, 1.1);
-                filter: drop-shadow(0 0 15px rgba(201, 176, 103, 0.3));
+            width: 100px; 
+            height: 100px; 
+            position: relative; 
+            transform-style: preserve-3d; 
+            /* 默认一个微倾斜角度，让 3D 感一览无余 */
+            transform: rotateX(-15deg) rotateY(15deg);
+            transition: transform 1.5s cubic-bezier(0.2, 0.8, 0.4, 1.2); /* 优化停止动画 */
+            filter: drop-shadow(0 0 10px rgba(201, 176, 103, 0.3)); /* 骰子整体发光 */
         }
 
-        /* --- 1. 面容器：严禁在此裁切！只负责 3D 骨架 --- */
+        /* --- 3. 骰子面骨架：真正的 3D 承载者 --- */
         .face {
             position: absolute;
-            width: 100px;
-            height: 100px;
+            width: 100%;
+            height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
             
-            /* 核心：确保 3D 空间完全透传 */
+            /* 核心：再次开启 3D 保护，确保内部子元素 Z 轴生效 */
             transform-style: preserve-3d;
             backface-visibility: hidden !important;
-            background: transparent; 
-            z-index: 10;
+            background: transparent; /* 父级透明，只做容器 */
         }
 
-        /* --- 2. 物理金边底座 (处于 Z 轴 0px) --- */
+        /* --- 4. 物理金边 (Z 轴 0px) --- */
         .face::before {
             content: "";
             position: absolute;
-            width: 100%;
-            height: 100%;
-            background: #c9b067; /* 纯正金色 */
-            /* 裁切只在这里做，不会影响 span 的位移 */
+            inset: 0;
+            background: #c9b067; /* 金色 */
             clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
-            transform: translateZ(0px);
+            transform: translateZ(0px); /* 最底层 */
+            pointer-events: none;
         }
 
-        /* --- 3. 宝石内衬 (处于 Z 轴 2px) --- */
-        /* 我们用 AFTER 制作一个略小的六边形，漏出边框，并向外推 2px */
+        /* --- 5. 黑色宝石内凹面 (Z 轴 2px) --- */
         .face::after {
             content: "";
             position: absolute;
-            /* 漏出 1.5px 的均匀金边 */
+            /* 漏出 1.5px 的金边 */
             inset: 1.5px; 
             background: #08080c;
             clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
             
-            /* 加强内凹感：用更深更广的阴影 */
+            /* 深度内凹阴影 */
             box-shadow: 
-                inset 10px 10px 30px rgba(0, 0, 0, 1),
-                inset -5px -5px 15px rgba(255, 255, 255, 0.05);
+                inset 10px 10px 30px rgba(0, 0, 0, 1), /* 更深邃的暗部 */
+                inset -5px -5px 15px rgba(255, 255, 255, 0.05); /* 微弱高光 */
             
-            /* 关键：必须比金边高一点，否则会产生闪烁 */
-            transform: translateZ(2px); 
+            transform: translateZ(2px); /* 比金边高 2px */
+            pointer-events: none;
         }
 
-        /* --- 4. 文字层 (处于 Z 轴 30px - 极致漂浮) --- */
+        /* --- 6. 文字符号 (Z 轴 30px - 极致漂浮) --- */
         .face span {
             position: relative;
-            display: block;
             z-index: 50;
             font-size: 2.3rem;
             color: #ffffff;
-            /* 增强金色光晕，使其看起来像是在宝石上方发光 */
             text-shadow: 
-                0 0 10px rgba(201, 176, 103, 1),
-                0 0 20px rgba(201, 176, 103, 0.6);
+                0 0 10px rgba(201, 176, 103, 1), /* 核心发光 */
+                0 0 20px rgba(201, 176, 103, 0.6); /* 外部光晕 */
             
-            /* 【立体感命脉】：将文字推离宝石面 28px */
-            /* 只要骰子旋转，文字就会产生巨大的位移，一眼就能看到 3D 效果 */
+            /* 【核心】：物理拉开 28px 的巨大 Z 轴距离 */
             transform: translateZ(30px); 
-            
-            /* 强制重置可能存在的压平属性 */
-            transform-style: preserve-3d;
+            display: block;
+            will-change: transform; /* 提升动画性能 */
         }
 
-        /* --- 5. 装饰横线 (处于 Z 轴 15px - 浮在中间) --- */
+        /* --- 7. 悬浮装饰线 (Z 轴 15px - 浮在中间) --- */
         .face span::after {
             content: "";
             position: absolute;
@@ -127,9 +122,10 @@
             background: linear-gradient(90deg, transparent, rgba(201, 176, 103, 0.8), transparent);
             left: 50%;
             top: -5px;
-            /* 位于文字和宝石面中间，增加视觉深度层数 */
-            transform: translateX(-50%) translateZ(-15px);
+            /* 位于文字下方，宝石上方 */
+            transform: translateX(-50%) translateZ(-15px); 
             box-shadow: 0 55px 0 rgba(201, 176, 103, 0.8);
+            pointer-events: none;
         }
 
         /* --- 3. 核心坐标合并：scaleX(1) 解决镜像 --- */
