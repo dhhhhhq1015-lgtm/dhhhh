@@ -26,11 +26,10 @@
             padding: 20px;
         }
 
-        /* 顶部工具 */
         .header { width: 100%; max-width: 700px; display: flex; justify-content: space-between; margin-bottom: 30px; }
         .btn-mini { background: rgba(255,255,255,0.1); border: 1px solid var(--gold); color: var(--gold); padding: 5px 15px; border-radius: 20px; cursor: pointer; font-size: 12px; backdrop-filter: blur(5px); }
 
-        /* --- 3D 骰子区域 --- */
+        /* --- 3D 舞台 --- */
         .dice-stage {
             display: flex;
             justify-content: center;
@@ -50,7 +49,7 @@
             filter: drop-shadow(0 0 10px rgba(201, 176, 103, 0.3));
         }
 
-        /* --- 核心面容器 --- */
+        /* --- 核心修复：面容器禁止使用 clip-path --- */
         .face {
             position: absolute;
             width: 100%;
@@ -58,12 +57,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transform-style: preserve-3d; /* 必须开启以支持 span 漂浮 */
+            transform-style: preserve-3d; 
             backface-visibility: hidden !important;
             background: transparent; 
         }
 
-        /* --- 物理金边 (Z=0) --- */
+        /* --- 金边底层 (Z=0) --- */
         .face::before {
             content: "";
             position: absolute;
@@ -86,15 +85,16 @@
             transform: translateZ(2px);
         }
 
-        /* --- 文字符号 (Z=30px 极致悬浮) --- */
+        /* --- 文字符号：通过独立的 span 实现 3D 悬浮 (Z=30px) --- */
         .face span {
             position: relative;
             z-index: 50;
             font-size: 2.3rem;
             color: #ffffff;
             text-shadow: 0 0 10px var(--gold), 0 0 20px rgba(201, 176, 103, 0.6);
-            transform: translateZ(30px); /* 这里产生 3D 视差 */
+            transform: translateZ(30px); /* 产生视觉差的核心 */
             display: block;
+            pointer-events: none;
         }
 
         /* 装饰横线 */
@@ -110,7 +110,7 @@
             box-shadow: 0 55px 0 rgba(201, 176, 103, 0.8);
         }
 
-        /* 原有旋转坐标（未修改） */
+        /* 原有坐标定义（未修改） */
         .front  { transform: rotateY(0deg) translateZ(52px); }
         .back   { transform: rotateY(180deg) translateZ(52px); }
         .right  { transform: rotateY(90deg) translateZ(52px); }
@@ -124,7 +124,6 @@
             to { transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg); } 
         }
 
-        /* 结果卡片样式（未修改文字文案逻辑） */
         .main-layout { width: 100%; max-width: 650px; }
         .card {
             background: var(--glass);
@@ -213,7 +212,6 @@
 <button class="btn-roll" onclick="startRoll()">投掷骰子</button>
 
 <script>
-    // 文案数据部分完整保留
     const planets = [
         { name: "太阳", sym: "☉", desc: "核心意志、目标感、荣耀、权威。代表“我要如何发光”。" },
         { name: "月亮", sym: "☽", desc: "内在情绪、滋养需求、潜意识、母性。代表“我需要什么安全感”。" },
@@ -245,18 +243,12 @@
     ];
 
     const houses = [
-        "1宫：自我、外貌、生命力、人格面具。",
-        "2宫：正财、价值观、个人资产、安全感来源。",
-        "3宫：兄弟姊妹、邻居、短期旅行、沟通交流。",
-        "4宫：原生家庭、父亲、晚年生活、心理根基、不动产。",
-        "5宫：恋爱、子女、创造力、投机、游戏娱乐。",
-        "6宫：日常劳作、健康、宠物、同事、服务。",
-        "7宫：婚姻伴侣、一对一合约、竞争对手、公开的敌人。",
-        "8宫：偏财、危机、他人钱财、深层欲望、疾厄。",
-        "9宫：高等教育、宗教哲学、远行、长途旅行。",
-        "10宫：事业成就、社会地位、母亲、长辈名望。",
-        "11宫：社交圈子、团体利益、朋友、社会理想。",
-        "12宫：潜意识、遁世、幕后、秘密、业力债务。"
+        "1宫：自我、外貌、生命力、人格面具。", "2宫：正财、价值观、个人资产、安全感来源。",
+        "3宫：兄弟姊妹、邻居、短期旅行、沟通交流。", "4宫：原生家庭、父亲、晚年生活、心理根基、不动产。",
+        "5宫：恋爱、子女、创造力、投机、游戏娱乐。", "6宫：日常劳作、健康、宠物、同事、服务。",
+        "7宫：婚姻伴侣、一对一合约、竞争对手、公开的敌人。", "8宫：偏财、危机、他人钱财、深层欲望、疾厄。",
+        "9宫：高等教育、宗教哲学、远行、长途旅行。", "10宫：事业成就、社会地位、母亲、长辈名望。",
+        "11宫：社交圈子、团体利益、朋友、社会理想。", "12宫：潜意识、遁世、幕后、秘密、业力债务。"
     ];
 
     function startRoll() {
@@ -282,10 +274,10 @@
         setTimeout(() => {
             [dp, ds, dh].forEach(d => d.classList.remove('rolling'));
 
-            // 核心：保持 span 结构更新结果
-            dp.querySelectorAll('.face').forEach(face => face.innerHTML = `<span>${p.sym}</span>`);
-            ds.querySelectorAll('.face').forEach(face => face.innerHTML = `<span>${s.sym}</span>`);
-            dh.querySelectorAll('.face').forEach(face => face.innerHTML = `<span>${h}</span>`);
+            // 关键逻辑：更新结果时必须维持 <span> 结构
+            dp.querySelectorAll('.face').forEach(f => f.innerHTML = `<span>${p.sym}</span>`);
+            ds.querySelectorAll('.face').forEach(f => f.innerHTML = `<span>${s.sym}</span>`);
+            dh.querySelectorAll('.face').forEach(f => f.innerHTML = `<span>${h}</span>`);
 
             [dp, ds, dh].forEach(d => {
                 d.style.transition = "transform 1.2s cubic-bezier(0.15, 0.85, 0.35, 1.1)";
