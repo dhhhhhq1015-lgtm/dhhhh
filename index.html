@@ -51,75 +51,91 @@
                 filter: drop-shadow(0 0 15px rgba(201, 176, 103, 0.3));
         }
 
-        /* --- 1. 基础面：控制 3D 空间与金边 --- */
+        /* ============================================================
+           核心：黑金宝石 3D 深度重构（金边 + 极致悬浮版）
+           注意：请直接替换你原代码中所有的 .face 及其伪元素样式
+           ============================================================ */
+
         .face {
             position: absolute;
             width: 100px;
             height: 100px;
-            background: #c9b067; /* 金边颜色 */
-            
-            /* 关键：不在这里裁切，防止压平内部 3D */
-            clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
-            
             display: flex;
             align-items: center;
             justify-content: center;
             
-            /* 开启最高等级 3D 保护 */
+            /* 1. 开启 3D 空间保护：严禁在此处使用 clip-path，否则会压平 3D 效果 */
             transform-style: preserve-3d;
             backface-visibility: hidden !important;
+            -webkit-backface-visibility: hidden !important;
+            background: transparent; 
+            z-index: 10;
         }
 
-        /* --- 2. 黑色宝石层：实现“内凹感”的核心 --- */
+        /* 2. 金色细边底座 (处于 Z 轴 0px) */
         .face::before {
             content: "";
             position: absolute;
-            /* 露出 1px 金边 */
-            inset: 1px; 
+            inset: 0;
+            background: #c9b067; /* 金色边框颜色 */
+            /* 在伪元素上裁切，不会影响 span 的 3D 位移 */
+            clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+            transform: translateZ(0px);
+            pointer-events: none;
+        }
+
+        /* 3. 黑色宝石内衬 (处于 Z 轴 1px) */
+        .face::after {
+            content: "";
+            position: absolute;
+            /* 关键：inset 1.5px 确保四周均匀露出 1.5px 的金色底色 */
+            inset: 1.5px; 
             background: #08080c;
-            
-            /* 同样进行六边形裁切 */
             clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
             
-            /* 这种组合阴影创造了“深坑”视觉 */
+            /* 深度内凹阴影 */
             box-shadow: 
-                inset 10px 10px 25px rgba(0, 0, 0, 0.9), 
-                inset -5px -5px 15px rgba(255, 215, 0, 0.05);
+                inset 8px 8px 25px rgba(0, 0, 0, 0.95),
+                inset -4px -4px 15px rgba(255, 255, 255, 0.05);
             
-            /* 【核心修改】：通过负 Z 值让宝石面真正“陷进去” */
+            /* 稍微前推，与金边产生物理层级 */
             transform: translateZ(1px); 
             pointer-events: none;
         }
 
-        /* --- 3. 装饰线：悬浮感 --- */
-        .face::after {
+        /* 4. 文字符号 (处于 Z 轴 25px) */
+        .face span {
+            position: relative;
+            z-index: 50;
+            font-size: 2.3rem;
+            color: #ffffff;
+            /* 强化金色发光效果 */
+            text-shadow: 
+                0 0 10px rgba(201, 176, 103, 1),
+                0 0 20px rgba(201, 176, 103, 0.5);
+            
+            /* 【立体感命脉】：大幅度拉开距离，产生强烈的视差 */
+            transform: translateZ(25px); 
+            display: block;
+            will-change: transform;
+        }
+
+        /* 5. 悬浮金色装饰线 (处于 Z 轴 10px，介于文字和底座之间) */
+        .face span::after {
             content: "";
             position: absolute;
-            width: 35px;
+            width: 38px;
             height: 1px;
             background: linear-gradient(90deg, transparent, rgba(201, 176, 103, 0.8), transparent);
             left: 50%;
-            top: 25%;
-            /* 悬浮在宝石面上方 4px */
-            transform: translateX(-50%) translateZ(5px);
-            box-shadow: 0 50px 0 rgba(201, 176, 103, 0.8); 
+            top: -5px;
+            /* 让装饰线也悬浮起来，位于文字下方 15px 处 */
+            transform: translateX(-50%) translateZ(-15px);
+            box-shadow: 0 50px 0 rgba(201, 176, 103, 0.8);
             pointer-events: none;
         }
 
-        /* --- 4. 文字符号：极致视差漂浮 --- */
-        .face span {
-            position: relative;
-            display: block;
-            font-size: 2.3rem;
-            color: #ffffff;
-            /* 强化金色光晕 */
-            text-shadow: 0 0 15px rgba(201, 176, 103, 1);
-            
-            /* 【立体感命脉】：将文字大幅推向观察者 25px */
-            /* 只要旋转，文字就会产生明显的位移差 */
-            transform: translateZ(25px); 
-            z-index: 50;
-        }
+        /* ============================================================ */
 
         /* --- 3. 核心坐标合并：scaleX(1) 解决镜像 --- */
         .front  { transform: rotateY(0deg) translateZ(52px) scaleX(1); }
