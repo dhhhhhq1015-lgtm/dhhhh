@@ -51,75 +51,74 @@
                 filter: drop-shadow(0 0 15px rgba(201, 176, 103, 0.3));
         }
 
-        /* --- 1. 核心：外层容器（专门负责金色细边） --- */
+        /* --- 1. 基础面：控制 3D 空间与金边 --- */
         .face {
             position: absolute;
             width: 100px;
             height: 100px;
+            background: #c9b067; /* 金边颜色 */
             
-            /* 关键：这里用纯金色背景，通过 inner 缩进露出 1px 形成边框 */
-            background: #c9b067; 
-            
-            backface-visibility: hidden !important;
-            -webkit-backface-visibility: hidden !important;
-
-            /* 六边形裁切 */
+            /* 关键：不在这里裁切，防止压平内部 3D */
             clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
             
             display: flex;
             align-items: center;
             justify-content: center;
+            
+            /* 开启最高等级 3D 保护 */
             transform-style: preserve-3d;
-            z-index: 10;
+            backface-visibility: hidden !important;
         }
 
-        /* --- 2. 宝石本体（负责内凹感与深邃感） --- */
-        /* 使用 before 作为内层宝石，inset: 1.5px 确保漏出外层的金边 */
+        /* --- 2. 黑色宝石层：实现“内凹感”的核心 --- */
         .face::before {
             content: "";
             position: absolute;
-            inset: 1.5px; /* 这里决定了金边的粗细 */
+            /* 露出 1px 金边 */
+            inset: 1px; 
             background: #08080c;
+            
+            /* 同样进行六边形裁切 */
             clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
             
-            /* 找回最核心的内凹立体感 */
+            /* 这种组合阴影创造了“深坑”视觉 */
             box-shadow: 
-                inset 10px 10px 25px rgba(0, 0, 0, 0.95),
-                inset -5px -5px 15px rgba(255, 255, 255, 0.05);
+                inset 10px 10px 25px rgba(0, 0, 0, 0.9), 
+                inset -5px -5px 15px rgba(255, 215, 0, 0.05);
             
-            /* 必须向内沉一点点，避免和文字层重叠导致闪烁 */
-            transform: translateZ(0.1px); 
+            /* 【核心修改】：通过负 Z 值让宝石面真正“陷进去” */
+            transform: translateZ(1px); 
             pointer-events: none;
         }
 
-        /* --- 3. 装饰线（悬浮于宝石之上） --- */
+        /* --- 3. 装饰线：悬浮感 --- */
         .face::after {
             content: "";
             position: absolute;
-            width: 38px;
+            width: 35px;
             height: 1px;
             background: linear-gradient(90deg, transparent, rgba(201, 176, 103, 0.8), transparent);
             left: 50%;
             top: 25%;
-            /* 悬浮高度，必须大于 0.1px */
-            transform: translateX(-50%) translateZ(5px); 
+            /* 悬浮在宝石面上方 4px */
+            transform: translateX(-50%) translateZ(5px);
             box-shadow: 0 50px 0 rgba(201, 176, 103, 0.8); 
             pointer-events: none;
         }
 
-        /* --- 4. 文字层（最高悬浮，产生强烈视差） --- */
+        /* --- 4. 文字符号：极致视差漂浮 --- */
         .face span {
             position: relative;
+            display: block;
             font-size: 2.3rem;
             color: #ffffff;
-            /* 宝石发光感 */
-            text-shadow: 
-                0 0 10px rgba(201, 176, 103, 0.9),
-                0 0 20px rgba(201, 176, 103, 0.4);
-            /* 飞出表面 20px */
-            transform: translateZ(20px); 
-            z-index: 20;
-            display: block;
+            /* 强化金色光晕 */
+            text-shadow: 0 0 15px rgba(201, 176, 103, 1);
+            
+            /* 【立体感命脉】：将文字大幅推向观察者 25px */
+            /* 只要旋转，文字就会产生明显的位移差 */
+            transform: translateZ(25px); 
+            z-index: 50;
         }
 
         /* --- 3. 核心坐标合并：scaleX(1) 解决镜像 --- */
