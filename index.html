@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -51,71 +51,73 @@
                 filter: drop-shadow(0 0 15px rgba(201, 176, 103, 0.3));
         }
 
-        /* --- 2. 深度复刻：黑金宝石 3D 面 (针对参考图优化) --- */
+/* --- 2. 深度复刻：黑金宝石 3D 面 (修复版) --- */
         .face {
             position: absolute;
             width: 100px;
             height: 100px;
             
-            /* 模拟参考图：深邃宝石底色 + 底部金色透光 */
+            /* 背景：增强对比度，模拟宝石深邃感 */
             background: 
-                radial-gradient(circle at 50% 120%, rgba(201, 176, 103, 0.4), transparent 75%),
-                radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.1), transparent 40%),
-                #0a0a0f; /* 加深底色，让金边更亮 */
+                radial-gradient(circle at 50% 120%, rgba(201, 176, 103, 0.45), transparent 80%),
+                radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.15), transparent 40%),
+                #08080c;
 
-            /* 核心防反向逻辑 */
+            /* 核心：必须设为 hidden，否则旋转时背面会透出来 */
             backface-visibility: hidden !important;
             -webkit-backface-visibility: hidden !important;
-            transform: scaleX(1) !important; 
 
             /* 六边形裁切 */
             clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
             
-            /* 参考图质感：极细且亮的金色外框 + 内部深度压暗 */
+            /* 边框：改用多层内阴影模拟金属包边的“厚度”和“反光” */
             box-shadow: 
-                inset 0 0 0 2px rgba(201, 176, 103, 0.9),  /* 增强金边厚度与亮度 */
-                inset 0 0 35px rgba(0, 0, 0, 0.95);         /* 增强内部深度感 */
+                inset 0 0 0 2px rgba(201, 176, 103, 0.8),  /* 主金边 */
+                inset 0 0 10px rgba(255, 215, 0, 0.2),     /* 金属微光 */
+                inset 0 0 35px rgba(0, 0, 0, 0.9);         /* 内部压暗 */
             
             display: flex;
             align-items: center;
             justify-content: center;
             color: #ffffff;
             
-            /* 关键：让子元素（文字）支持 3D 层级 */
+            /* 必须保留，否则子元素 span 无法实现漂浮 */
             transform-style: preserve-3d;
             will-change: transform;
             z-index: 10;
         }
 
-        /* 模拟参考图：文字上下的装饰线 */
+        /* 装饰线：增加亮度 */
         .face::before, .face::after {
             content: "";
             position: absolute;
             width: 35px;
             height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(201, 176, 103, 0.8), transparent);
+            background: linear-gradient(90deg, transparent, rgba(201, 176, 103, 0.9), transparent);
             left: 50%;
-            transform: translateX(-50%) translateZ(1px); /* 向上提 1px 避免被遮挡 */
+            transform: translateX(-50%) translateZ(1px);
         }
         .face::before { top: 22%; }
         .face::after { bottom: 22%; }
 
-        /* 文字容器：确保文字漂浮在装饰线之上 */
+        /* 文字层：文字必须有独立的 translateZ 才有立体感 */
         .face span {
             font-size: 2.2rem;
-            text-shadow: 0 0 15px rgba(201, 176, 103, 0.7);
-            transform: translateZ(2px); /* 漂浮感关键 */
+            text-shadow: 0 0 15px rgba(201, 176, 103, 0.8);
+            transform: translateZ(10px); /* 显著提升漂浮感 */
             position: relative;
             z-index: 15;
+            display: block;
         }
 
-        /* --- 3. 物理坐标：再次微调 Z 轴 --- */
-        .front  { transform: rotateY(0deg) translateZ(52px); }
-        .back   { transform: rotateY(180deg) translateZ(52px); }
-        .right  { transform: rotateY(90deg) translateZ(52px); }
-        .left   { transform: rotateY(-90deg) translateZ(52px); }
-        .top    { transform: rotateX(90deg) translateZ(52px); }
-        .bottom { transform: rotateX(-90deg) translateZ(52px); }}
+        /* --- 3. 核心坐标修复：在这里合并 scaleX(1) --- */
+        /* 如果你的文字依然反向，请把所有的 scaleX(1) 改成 scaleX(-1) */
+        .front  { transform: rotateY(0deg) translateZ(52px) scaleX(1); }
+        .back   { transform: rotateY(180deg) translateZ(52px) scaleX(1); }
+        .right  { transform: rotateY(90deg) translateZ(52px) scaleX(1); }
+        .left   { transform: rotateY(-90deg) translateZ(52px) scaleX(1); }
+        .top    { transform: rotateX(90deg) translateZ(52px) scaleX(1); }
+        .bottom { transform: rotateX(-90deg) translateZ(52px) scaleX(1); }
         
         /* --- 4. 旋转动画：增加Z轴旋转使路径更随机复杂 --- */
         .rolling { 
@@ -294,15 +296,16 @@
                         [dp, ds, dh].forEach(d => d.classList.remove('rolling'));
 
                         // 5. 将结果填入【每一个面】，并保留 3D 结构
-                        dp.querySelectorAll('.face').forEach(face => {
+                         dp.querySelectorAll('.face').forEach(face => {
+                       // 使用 innerHTML 保持 span 结构，这样 CSS 的 translateZ 才能生效
                          face.innerHTML = `<span>${p.sym}</span>`;
-                        });
-                        ds.querySelectorAll('.face').forEach(face => {
+                       });
+                         ds.querySelectorAll('.face').forEach(face => {
                          face.innerHTML = `<span>${s.sym}</span>`;
-                        });
-                        dh.querySelectorAll('.face').forEach(face => {
+                       });
+                         dh.querySelectorAll('.face').forEach(face => {
                          face.innerHTML = `<span>${h}</span>`;
-                        });
+                       });
 
                         // 6. 【核心修复】：强制归零
                         // 不管之前转成什么样，停止时强制回到初始的、绝对正向的 0,0,0 坐标
