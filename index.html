@@ -51,28 +51,25 @@
                 filter: drop-shadow(0 0 15px rgba(201, 176, 103, 0.3));
         }
 
-        /* --- 2. 深度复刻：黑金宝石 3D 立体面 --- */
+        /* --- 核心：黑金宝石 3D 立体面（金边+内凹+漂浮感） --- */
         .face {
             position: absolute;
             width: 100px;
             height: 100px;
             
-            /* 基础深蓝色宝石底色 */
+            /* 1. 宝石基底 */
             background: #08080c;
-
-            /* 核心防反向逻辑 */
             backface-visibility: hidden !important;
             -webkit-backface-visibility: hidden !important;
 
-            /* 六边形裁切 */
+            /* 2. 六边形裁切 */
             clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
             
-            /* 【立体感核心 1】：多重阴影模拟“内凹”和“金属边缘” */
+            /* 3. 找回你最满意的：内凹立体感阴影 */
             box-shadow: 
-                inset 0 0 0 2px rgba(201, 176, 103, 0.9),  /* 最外层锐利金边 */
-                inset 0 0 15px rgba(255, 215, 0, 0.3),     /* 边框发光 */
-                inset 5px 5px 20px rgba(0, 0, 0, 0.8),     /* 左上压暗阴影 */
-                inset -5px -5px 20px rgba(255, 255, 255, 0.05); /* 右下微弱高光 */
+                inset 5px 5px 25px rgba(0, 0, 0, 0.9),      /* 深度暗部 */
+                inset -3px -3px 15px rgba(255, 255, 255, 0.05), /* 微弱反光 */
+                0 0 10px rgba(0, 0, 0, 0.5);                /* 外部轻微投影 */
             
             display: flex;
             align-items: center;
@@ -82,39 +79,51 @@
             z-index: 10;
         }
 
-        /* 【立体感核心 2】：利用伪元素增加“内部折射层” */
+        /* 4. 均匀金色细边（利用外层描边） */
+        /* 我们给 face 本身加一个极其锐利的 drop-shadow 来模拟 1px 金边 */
+        .face {
+            filter: drop-shadow(0 0 0.8px rgba(201, 176, 103, 0.9));
+        }
+
+        /* 5. 宝石内部的“次级切面”（增强内凹视觉） */
         .face::before {
             content: "";
             position: absolute;
-            inset: 8px; /* 往内缩 8px */
-            background: radial-gradient(circle at 30% 30%, rgba(201, 176, 103, 0.15) 0%, transparent 70%);
-            border: 1px solid rgba(201, 176, 103, 0.2);
+            inset: 4px; /* 稍微缩进 */
+            background: radial-gradient(circle at 20% 20%, rgba(201, 176, 103, 0.12) 0%, transparent 60%);
+            border: 1px solid rgba(201, 176, 103, 0.15); /* 内部的第二道弱金线 */
             clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
-            transform: translateZ(-1px); /* 往内部沉 1px，产生视觉深度 */
+            transform: translateZ(-2px); /* 关键：向内下沉，产生内凹空间感 */
             pointer-events: none;
         }
 
-        /* 文字装饰线：增加发光感 */
+        /* 6. 文字装饰横线（金色发光） */
         .face::after {
             content: "";
             position: absolute;
-            width: 35px;
+            width: 38px;
             height: 1px;
+            /* 具有呼吸感的金色渐变 */
             background: linear-gradient(90deg, transparent, rgba(201, 176, 103, 0.8), transparent);
             left: 50%;
-            transform: translateX(-50%) translateZ(2px);
-            /* 这里只定义一条线，通过 box-shadow 复制出另一条 */
+            transform: translateX(-50%) translateZ(5px); /* 悬浮在内凹层之上 */
             top: 25%;
+            /* 使用 box-shadow 完美镜像出下方的那条线 */
             box-shadow: 0 50px 0 rgba(201, 176, 103, 0.8); 
+            pointer-events: none;
         }
 
-        /* 文字层：大幅度 translateZ 产生漂浮感 */
+        /* 7. 文字层：极致漂浮 */
         .face span {
-            font-size: 2.2rem;
-            color: #fff;
-            text-shadow: 0 0 15px rgba(201, 176, 103, 0.9);
-            transform: translateZ(15px); /* 文字飞出表面 15px */
+            font-size: 2.3rem;
+            color: #ffffff;
+            /* 强化金色光晕，模拟宝石折射 */
+            text-shadow: 
+                0 0 10px rgba(201, 176, 103, 0.8),
+                0 0 20px rgba(201, 176, 103, 0.4);
+            transform: translateZ(20px); /* 飞出宝石表面，产生强烈的 3D 视差 */
             z-index: 20;
+            display: block;
         }
 
         /* --- 3. 核心坐标合并：scaleX(1) 解决镜像 --- */
