@@ -70,8 +70,9 @@
             position: absolute;
             inset: 0;
             background: var(--dice-border);
-           clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
-           transform: translateZ(0px);
+           /* 修改点：将 25%/75% 改为 22%/78%，让顶部和底部的边更长，整体视觉更宽 */
+            clip-path: polygon(22% 0%, 78% 0%, 100% 50%, 78% 100%, 22% 100%, 0% 50%);
+            transform: translateZ(0px);
         }
 
         /* 2. 极细金边：增加 inset 保证黑色区域更大 */
