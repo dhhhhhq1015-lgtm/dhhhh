@@ -13,7 +13,7 @@
             --dice-border: rgba(201, 176, 103, 0.3); /* 专门给骰子用的 30% 透明金 */
             --glass: rgba(15, 15, 25, 0.75); 
             --text-white: #ffffff;
-            --dice-size: 64px;
+            --dice-size: 80px;
         }
 
         body {
@@ -109,19 +109,27 @@
         }
 
         /* 核心坐标重算：translateZ 必须是 dice-size 的一半 (32px) */
-        .front  { transform: rotateY(0deg) translateZ(32px); }
-        .back   { transform: rotateY(180deg) translateZ(32px); }
-        .right  { transform: rotateY(90deg) translateZ(32px); }
-        .left   { transform: rotateY(-90deg) translateZ(32px); }
-        .top    { transform: rotateX(90deg) translateZ(32px); }
-        .bottom { transform: rotateX(-90deg) translateZ(32px); }
+        .front  { transform: rotateY(0deg) translateZ(40px); }
+        .back   { transform: rotateY(180deg) translateZ(40px); }
+        .right  { transform: rotateY(90deg) translateZ(40px); }
+        .left   { transform: rotateY(-90deg) translateZ(40px); }
+        .top    { transform: rotateX(90deg) translateZ(40px); }
+        .bottom { transform: rotateX(-90deg) translateZ(40px); }
 
         /* 移动端强制适配 */
         @media (max-width: 480px) {
-            .dice-stage { gap: 30px; margin: 40px 0; }
-            .main-layout { max-width: 95vw; }
-            .btn-roll { padding: 12px 40px; font-size: 16px; }
-        }
+        :root {
+        /* 手机端尺寸设定 */
+        --dice-size: 70px; 
+        /* 自动计算位移量：一半的尺寸 */
+        --half-size: calc(var(--dice-size) / 2); 
+       }
+
+       /* 3D 舞台间距微调 */
+       .dice-stage {
+           gap: 20px; 
+           margin: 40px 0;
+       }
 
         .rolling { animation: spin 0.5s infinite linear; }
         @keyframes spin { 
