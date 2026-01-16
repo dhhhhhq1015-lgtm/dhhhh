@@ -8,11 +8,13 @@
     <style>
         :root {
             --bg-image: url('bg.jpg'); 
-            --gold: #c9b067;           /* 恢复原本亮丽的金，用于标题和文字 */
-            --dice-border: rgba(201, 176, 103, 0.3); /* 专门给骰子用的 30% 透明金 */
+            --gold: #c9b067;
+            --dice-border: rgba(201, 176, 103, 0.4);
             --glass: rgba(15, 15, 25, 0.75); 
             --text-white: #ffffff;
             --dice-size: 64px;
+            /* 六角柱侧面中心到轴心的距离 */
+            --z-dist: 27.7px;
         }
 
         body {
@@ -28,24 +30,17 @@
             padding: 20px;
         }
 
-        /* 顶部按钮 */
         .header { width: 100%; max-width: 700px; display: flex; justify-content: space-between; margin-bottom: 30px; }
         .btn-mini { background: rgba(255,255,255,0.1); border: 1px solid var(--gold); color: var(--gold); padding: 5px 15px; border-radius: 20px; cursor: pointer; font-size: 12px; backdrop-filter: blur(5px); }
 
-        /* 3D 舞台：修复了这里的花括号闭合错误，并加大了间距 */
         .dice-stage {
             display: flex;
             justify-content: center;
             align-items: center; 
-            gap: 55px;           /* 增加到45px，防止3D旋转时面与面相撞 */
+            gap: 60px;
             perspective: 1500px;
             margin: 60px 0;      
-            min-height: 120px;   
-        }
-        
-        /* 1. 调整容器透视：增加视距，让侧边的斜度更自然 */
-        .dice-container {
-            perspective: 1200px;
+            min-height: 140px;   
         }
 
         .dice-3d { 
@@ -53,88 +48,70 @@
             height: var(--dice-size); 
             position: relative; 
             transform-style: preserve-3d; 
-            transform: rotateX(-8deg) rotateY(10deg);
+            transform: rotateX(-15deg) rotateY(15deg);
             transition: transform 1.5s cubic-bezier(0.2, 0.8, 0.3, 1.1);
         }
 
-        /* 面容器：修复了面片的定位 */
+        /* 侧面基础样式 */
         .face {
             position: absolute;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.9); /* 面的底色 */
-            backface-visibility: hidden;
+            width: 32px;
+            height: var(--dice-size);
+            left: 16px;
+            background: rgba(10, 10, 15, 0.95);
+            backface-visibility: visible;
             display: flex;
             align-items: center;
             justify-content: center;
-            /* 关键：增加一个阴影，模拟面与面交界处的厚度感 */
-            box-shadow: 0 0 0 1px rgba(201, 176, 103, 0.2); 
+            border-top: 1px solid var(--dice-border);
+            border-bottom: 1px solid var(--dice-border);
         }
-        
-        /* 1. 金边底层 (Z=0) */
+
+        /* 侧面装饰金边 */
         .face::before {
             content: "";
             position: absolute;
-            /* 稍微向外扩张 0.5px，填补 3D 拼接缝隙 */
-            inset: -0.5px; 
-            background: var(--dice-border);
-            clip-path: polygon(15% 0%, 85% 0%, 100% 50%, 85% 100%, 15% 100%, 0% 50%);
-            transform: translateZ(0);
+            inset: 0;
+            border-left: 1px solid var(--dice-border);
+            border-right: 1px solid var(--dice-border);
         }
 
-        /* 2. 极细金边：增加 inset 保证黑色区域更大 */
-        .face::after {
-            content: "";
+        /* 六边形封盖 */
+        .cap {
             position: absolute;
-            inset: 2px; 
-            background: radial-gradient(circle at center, #12121a, #050508);
-            background: radial-gradient(circle at center, #1a1a24, #08080c);
-            clip-path: polygon(15% 0%, 85% 0%, 100% 50%, 85% 100%, 15% 100%, 0% 50%);
-            /* 这里的 translateZ 设为 1px，让黑色面板稍微凸起 */
-            transform: translateZ(1px);
+            width: var(--dice-size);
+            height: var(--dice-size);
+            left: 0;
+            background: radial-gradient(circle at center, #1a1a24, #050508);
+            clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+            border: 1px solid var(--gold);
         }
 
-        /* 3. 符号层 */
+        .cap.top    { transform: rotateX(90deg) translateZ(32px); }
+        .cap.bottom { transform: rotateX(-90deg) translateZ(32px); }
+
+        /* 符号样式 */
         .face span {
-            position: relative;
-            z-index: 100;
-            font-size: 1.6rem; 
+            font-size: 1.4rem; 
             color: #ffffff;
             text-shadow: 0 0 10px var(--gold), 0 0 3px #fff;
-            /* --- 核心修改点 --- */
-            /* 从原来的 20px 改为 2px，这样符号就“落”在表面上了 */
             transform: translateZ(2px); 
-            
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            height: 100%;
-            line-height: 1;
-            margin-top: -2px; 
-        }
-        
-        /* 核心坐标重算：translateZ 必须是 dice-size 的一半 (32px) */
-        .front  { transform: rotateY(0deg) translateZ(32px); }
-        .back   { transform: rotateY(180deg) translateZ(32px); }
-        .right  { transform: rotateY(90deg) translateZ(32px); }
-        .left   { transform: rotateY(-90deg) translateZ(32px); }
-        .top    { transform: rotateX(90deg) translateZ(32px); }
-        .bottom { transform: rotateX(-90deg) translateZ(32px); }
-
-        /* 移动端强制适配 */
-        @media (max-width: 480px) {
-            .dice-stage { gap: 30px; margin: 40px 0; }
-            .main-layout { max-width: 95vw; }
-            .btn-roll { padding: 12px 40px; font-size: 16px; }
         }
 
-        .rolling { animation: spin 0.5s infinite linear; }
+        /* 6侧面旋转逻辑 */
+        .s1 { transform: rotateY(0deg)   translateZ(var(--z-dist)); }
+        .s2 { transform: rotateY(60deg)  translateZ(var(--z-dist)); }
+        .s3 { transform: rotateY(120deg) translateZ(var(--z-dist)); }
+        .s4 { transform: rotateY(180deg) translateZ(var(--z-dist)); }
+        .s5 { transform: rotateY(240deg) translateZ(var(--z-dist)); }
+        .s6 { transform: rotateY(300deg) translateZ(var(--z-dist)); }
+
+        .rolling { animation: spin 0.6s infinite linear; }
         @keyframes spin { 
             from { transform: rotateX(0deg) rotateY(0deg); } 
             to { transform: rotateX(360deg) rotateY(360deg); } 
         }
 
-        /* 结果展示区 */
         .main-layout { width: 100%; max-width: 650px; }
         .card {
             background: var(--glass);
@@ -179,28 +156,34 @@
     <div id="capture-area" style="padding: 10px; width: 100%; display: flex; flex-direction: column; align-items: center;">
         <div class="dice-stage">
             <div class="dice-3d" id="dice-p">
-                <div class="face front"><span>?</span></div>
-                <div class="face back"><span>☉</span></div>
-                <div class="face right"><span>☽</span></div>
-                <div class="face left"><span>♂</span></div>
-                <div class="face top"><span>☿</span></div>
-                <div class="face bottom"><span>♃</span></div>
+                <div class="face s1"><span>?</span></div>
+                <div class="face s2"><span>?</span></div>
+                <div class="face s3"><span>?</span></div>
+                <div class="face s4"><span>?</span></div>
+                <div class="face s5"><span>?</span></div>
+                <div class="face s6"><span>?</span></div>
+                <div class="cap top"></div>
+                <div class="cap bottom"></div>
             </div>
             <div class="dice-3d" id="dice-s">
-                <div class="face front"><span>?</span></div>
-                <div class="face back"><span>♈</span></div>
-                <div class="face right"><span>♉</span></div>
-                <div class="face left"><span>♊</span></div>
-                <div class="face top"><span>♋</span></div>
-                <div class="face bottom"><span>♌</span></div>
+                <div class="face s1"><span>?</span></div>
+                <div class="face s2"><span>?</span></div>
+                <div class="face s3"><span>?</span></div>
+                <div class="face s4"><span>?</span></div>
+                <div class="face s5"><span>?</span></div>
+                <div class="face s6"><span>?</span></div>
+                <div class="cap top"></div>
+                <div class="cap bottom"></div>
             </div>
             <div class="dice-3d" id="dice-h">
-                <div class="face front"><span>?</span></div>
-                <div class="face back"><span>1</span></div>
-                <div class="face right"><span>4</span></div>
-                <div class="face left"><span>7</span></div>
-                <div class="face top"><span>10</span></div>
-                <div class="face bottom"><span>12</span></div>
+                <div class="face s1"><span>?</span></div>
+                <div class="face s2"><span>?</span></div>
+                <div class="face s3"><span>?</span></div>
+                <div class="face s4"><span>?</span></div>
+                <div class="face s5"><span>?</span></div>
+                <div class="face s6"><span>?</span></div>
+                <div class="cap top"></div>
+                <div class="cap bottom"></div>
             </div>
         </div>
 
@@ -223,50 +206,47 @@
     <button class="btn-roll" onclick="startRoll()">投掷骰子</button>
 
 <script>
-    // 脚本内容保持不变，仅修正了一个逻辑
     const planets = [
-        { name: "太阳", sym: "☉", desc: "核心意志、目标感、荣耀、权威。代表“我要如何发光”。" },
-        { name: "月亮", sym: "☽", desc: "内在情绪、滋养需求、潜意识、母性。代表“我需要什么安全感”。" },
-        { name: "水星", sym: "☿", desc: "沟通、逻辑、信息传播、短途旅行。代表“我如何思考与表达”。" },
-        { name: "金星", sym: "♀", desc: "美、和谐、金钱价值、感官享受、爱情。代表“我渴望什么价值”。" },
-        { name: "火星", sym: "♂", desc: "行动力、欲望、竞争、冲突、性。代表“我如何去获取/争夺”。" },
-        { name: "木星", sym: "♃", desc: "扩张、幸运、高等教育、法律、机遇。代表“我如何获得成长”。" },
-        { name: "土星", sym: "♄", desc: "限制、责任、磨练、结构、长者。代表“我必须承担什么压力”。" },
-        { name: "天王星", sym: "♅", desc: "突变、原创、离经叛道、觉醒。代表“我在哪里追求自由”。" },
-        { name: "海王星", sym: "♆", desc: "梦幻、模糊、疗愈、艺术、牺牲。代表“我在哪里容易沉溺/灵性”。" },
-        { name: "冥王星", sym: "♇", desc: "深度转化、权力、极致、死亡与重生。代表“我如何彻底蜕变”。" },
+        { name: "太阳", sym: "☉", desc: "核心意志、目标感、荣耀、权威。" },
+        { name: "月亮", sym: "☽", desc: "内在情绪、滋养需求、潜意识、母性。" },
+        { name: "水星", sym: "☿", desc: "沟通、逻辑、信息传播、短途旅行。" },
+        { name: "金星", sym: "♀", desc: "美、和谐、金钱价值、感官享受、爱情。" },
+        { name: "火星", sym: "♂", desc: "行动力、欲望、竞争、冲突、性。" },
+        { name: "木星", sym: "♃", desc: "扩张、幸运、高等教育、法律、机遇。" },
+        { name: "土星", sym: "♄", desc: "限制、责任、磨练、结构、长者。" },
+        { name: "天王星", sym: "♅", desc: "突变、原创、离经叛道、觉醒。" },
+        { name: "海王星", sym: "♆", desc: "梦幻、模糊、疗愈、艺术、牺牲。" },
+        { name: "冥王星", sym: "♇", desc: "深度转化、权力、极致、死亡与重生。" },
         { name: "北交点", sym: "☊", desc: "今生努力的方向、灵魂渴求的扩展点。" },
-        { name: "南交点", sym: "☋", desc: "过去熟悉的模式、习惯、需要舍弃的舒适区。" }
+        { name: "南交点", sym: "☋", desc: "过去熟悉的模式、习惯。" }
     ];
 
     const signs = [
-        { name: "白羊座", sym: "♈", desc: "火象/创始。直接、鲁莽、开创性。关键词：我是。", ruler: "火星", multi: "天蝎" },
-        { name: "金牛座", sym: "♉", desc: "土象/固定。稳健、物质、感官享受。关键词：我有。", ruler: "金星", multi: "天秤" },
-        { name: "双子座", sym: "♊", desc: "风象/变动。好奇、双重、传播。关键词：我想。", ruler: "水星", multi: "处女" },
-        { name: "巨蟹座", sym: "♋", desc: "水象/创始。敏感、滋养、保护。关键词：我感觉。", ruler: "月亮" },
-        { name: "狮子座", sym: "♌", desc: "火象/固定。华丽、骄傲、创造。关键词：我意志。", ruler: "太阳" },
-        { name: "处女座", sym: "♍", desc: "土象/变动。精细、批判、服务。关键词：我分析。", ruler: "水星", multi: "双子" },
-        { name: "天秤座", sym: "♎", desc: "风象/创始。权衡、和谐、社交。关键词：我平衡。", ruler: "金星", multi: "金牛" },
-        { name: "天蝎座", sym: "♏", desc: "水象/固定。深邃、极致、转化。关键词：我渴望。", ruler: "火星", multi: "白羊" },
-        { name: "射手座", sym: "♐", desc: "火象/变动。乐观、远大、探索。关键词：我理解。", ruler: "木星", multi: "双鱼" },
-        { name: "摩羯座", sym: "♑", desc: "土象/创始。务实、野心、克制。关键词：我利用。", ruler: "土星", multi: "水瓶" },
-        { name: "水瓶座", sym: "♒", desc: "风象/固定。独立、客观、超前。关键词：我知晓。", ruler: "土星", multi: "摩羯" },
-        { name: "双鱼座", sym: "♓", desc: "水象/变动。慈悲、消融、灵性。关键词：我信奉。", ruler: "木星", multi: "射手" }
+        { name: "白羊座", sym: "♈", desc: "火象/创始。直接、鲁莽、开创性。", ruler: "火星", multi: "天蝎" },
+        { name: "金牛座", sym: "♉", desc: "土象/固定。稳健、物质、感官享受。", ruler: "金星", multi: "天秤" },
+        { name: "双子座", sym: "♊", desc: "风象/变动。好奇、双重、传播。", ruler: "水星", multi: "处女" },
+        { name: "巨蟹座", sym: "♋", desc: "水象/创始。敏感、滋养、保护。", ruler: "月亮" },
+        { name: "狮子座", sym: "♌", desc: "火象/固定。华丽、骄傲、创造。", ruler: "太阳" },
+        { name: "处女座", sym: "♍", desc: "土象/变动。精细、批判、服务。", ruler: "水星", multi: "双子" },
+        { name: "天秤座", sym: "♎", desc: "风象/创始。权衡、和谐、社交。", ruler: "金星", multi: "金牛" },
+        { name: "天蝎座", sym: "♏", desc: "水象/固定。深邃、极致、转化。", ruler: "火星", multi: "白羊" },
+        { name: "射手座", sym: "♐", desc: "火象/变动。乐观、远大、探索。", ruler: "木星", multi: "双鱼" },
+        { name: "摩羯座", sym: "♑", desc: "土象/创始。务实、野心、克制。", ruler: "土星", multi: "水瓶" },
+        { name: "水瓶座", sym: "♒", desc: "风象/固定。独立、客观、超前。", ruler: "土星", multi: "摩羯" },
+        { name: "双鱼座", sym: "♓", desc: "水象/变动。慈悲、消融、灵性。", ruler: "木星", multi: "射手" }
     ];
 
     const houses = [
-        "1宫：自我、外貌、生命力、人格面具。", "2宫：正财、价值观、个人资产、安全感来源。",
-        "3宫：兄弟姊妹、邻居、短期旅行、沟通交流。", "4宫：原生家庭、父亲、晚年生活、心理根基、不动产。",
-        "5宫：恋爱、子女、创造力、投机、游戏娱乐。", "6宫：日常劳作、健康、宠物、同事、服务。",
-        "7宫：婚姻伴侣、一对一合约、竞争对手、公开的敌人。", "8宫：偏财、危机、他人钱财、深层欲望、疾厄。",
-        "9宫：高等教育、宗教哲学、远行、长途旅行。", "10宫：事业成就、社会地位、母亲、长辈名望。",
-        "11宫：社交圈子、团体利益、朋友、社会理想。", "12宫：潜意识、遁世、幕后、秘密、业力债务。"
+        "1宫：自我、外貌、生命力。", "2宫：正财、价值观、个人资产。",
+        "3宫：沟通交流、短期旅行。", "4宫：原生家庭、根基、不动产。",
+        "5宫：恋爱、子女、创造力。", "6宫：日常劳作、健康、服务。",
+        "7宫：婚姻伴侣、契约、对手。", "8宫：偏财、危机、深层欲望。",
+        "9宫：高等教育、宗教哲学、远行。", "10宫：事业成就、社会地位。",
+        "11宫：社交圈子、朋友、理想。", "12宫：潜意识、遁世、业力。"
     ];
 
     function startRoll() {
-        const dp = document.getElementById('dice-p');
-        const ds = document.getElementById('dice-s');
-        const dh = document.getElementById('dice-h');
+        const dps = [document.getElementById('dice-p'), document.getElementById('dice-s'), document.getElementById('dice-h')];
         const btn = document.querySelector('.btn-roll');
 
         btn.disabled = true;
@@ -278,24 +258,20 @@
         const hIndex = Math.floor(Math.random() * 12); 
         const h = hIndex + 1;
 
-        [dp, ds, dh].forEach(d => {
-            d.classList.add('rolling');
-        });
+        dps.forEach(d => d.classList.add('rolling'));
 
         setTimeout(() => {
-            [dp, ds, dh].forEach(d => d.classList.remove('rolling'));
+            dps.forEach(d => d.classList.remove('rolling'));
 
-            dp.querySelectorAll('.face').forEach(f => f.innerHTML = `<span>${p.sym}</span>`);
-            ds.querySelectorAll('.face').forEach(f => f.innerHTML = `<span>${s.sym}</span>`);
-            dh.querySelectorAll('.face').forEach(f => f.innerHTML = `<span>${h}</span>`);
+            // 核心修改：只给 6 个侧面 (face) 填符号
+            dps[0].querySelectorAll('.face span').forEach(f => f.innerHTML = p.sym);
+            dps[1].querySelectorAll('.face span').forEach(f => f.innerHTML = s.sym);
+            dps[2].querySelectorAll('.face span').forEach(f => f.innerHTML = h);
 
-            /* --- 核心修改：调整最终停留角度 --- */
-            [dp, ds, dh].forEach(d => {
-                // 原本是 (0deg, 0deg)，现在改为稍微偏转的角度
-                // rotateX(-10deg) 让骰子稍微向下低头，露出顶部的棱角
-                // rotateY(12deg) 让骰子稍微向左转头，露出右侧的厚度
-                d.style.transform = "rotateX(-10deg) rotateY(12deg)"; 
-            });
+            // 最终停留角度： rotateX 稍微俯视，rotateY 稍微偏转展现 3D 棱角
+            dps[0].style.transform = "rotateX(-15deg) rotateY(15deg)";
+            dps[1].style.transform = "rotateX(-10deg) rotateY(-12deg)";
+            dps[2].style.transform = "rotateX(-20deg) rotateY(5deg)";
 
             document.getElementById('res-card').style.display = 'block';
             document.getElementById('res-title').innerText = `${p.name} 落 ${s.name} · ${h}宫`;
@@ -303,9 +279,9 @@
             document.getElementById('res-s-desc').innerText = s.desc;
             document.getElementById('res-h-desc').innerText = houses[hIndex];
 
-            document.getElementById('res-rel').innerText = `💡 伴侣视角(7宫视角)：相当于其第 ${(h - 7 + 12) % 12 + 1} 宫。`;
-            let fly = `✨ 飞星：请观察原局【${s.ruler}】落位。`;
-            if (s.multi) fly += ` (${s.ruler}亦守护${s.multi})`;
+            document.getElementById('res-rel').innerText = `💡 7宫视角：相当于其第 ${(h - 7 + 12) % 12 + 1} 宫。`;
+            let fly = `✨ 守护：${s.ruler}。`;
+            if (s.multi) fly += ` (守护${s.name}及${s.multi}座)`;
             document.getElementById('res-fly').innerText = fly;
 
             btn.disabled = false;
@@ -315,7 +291,7 @@
     
     function downloadImage() {
         const area = document.getElementById('capture-area');
-        html2canvas(area, { backgroundColor: null, scale: 2, useCORS: true }).then(canvas => {
+        html2canvas(area, { backgroundColor: "#050508", scale: 2, useCORS: true }).then(canvas => {
             const link = document.createElement('a');
             link.download = `AstroResult_${Date.now()}.png`;
             link.href = canvas.toDataURL("image/png");
