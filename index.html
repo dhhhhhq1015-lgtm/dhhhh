@@ -8,7 +8,7 @@
     <style>
         :root {
             --bg-image: url('bg.jpg'); 
-            --gold: #c9b067;
+            --gold: rgba(255, 255, 255, 0.9); /* 改为近纯白 */
             --glass: rgba(15, 15, 25, 0.75); 
             --text-white: #ffffff;
             --dice-size: 64px;
@@ -69,19 +69,21 @@
             position: absolute;
             inset: 0;
             background: var(--gold);
-            clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
-            transform: translateZ(0px);
+           clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+            /* 核心：增加白色外发光 */
+            filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.6));
         }
 
         /* 2. 极细金边：增加 inset 保证黑色区域更大 */
         .face::after {
             content: "";
             position: absolute;
-            inset: 1.5px; 
+            inset: 2px; 
             background: radial-gradient(circle at center, #1a1a24, #08080c);
             clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
             transform: translateZ(1px);
-            box-shadow: inset 0 0 12px rgba(0,0,0,0.9);
+            /* 内部阴影，增加深度感 */
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
         }
 
         /* 3. 符号层 */
@@ -90,7 +92,8 @@
             z-index: 100;
             font-size: 1.5rem; 
             color: #ffffff;
-            text-shadow: 0 0 10px var(--gold), 0 0 3px #fff;
+            /* 改为白光叠加 */
+            text-shadow: 0 0 10px rgba(255,255,255,0.8), 0 0 3px #fff;
             transform: translateZ(20px); 
             display: block;
         }
