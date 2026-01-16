@@ -147,9 +147,16 @@
         .box p { font-size: 14px; color: var(--text-white); line-height: 1.6; margin: 0; }
 
         .btn-roll {
-            background: rgba(255, 255, 255, 0.1);
-            color: #ffffff;
-            border: 1px solid rgba(255, 255, 255, 0.8);
+            /* 1. 背景设置为黑色，10% 透明度 */
+            background: rgba(0, 0, 0, 0.1); 
+            
+            /* 2. 字体设置为白色 */
+            color: #ffffff; 
+            
+            /* 3. 边框设置为与顶部按钮一致的金边 */
+            border: 1px solid var(--gold); 
+            
+            /* 其他布局保持一致 */
             padding: 14px 80px; 
             border-radius: 40px;
             font-weight: bold; 
@@ -157,12 +164,16 @@
             font-size: 18px; 
             margin: 40px auto; 
             display: block;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px); /* 磨砂效果 */
             letter-spacing: 5px;
             transition: all 0.3s ease;
         }
-        .btn-roll:hover { background: rgba(255, 255, 255, 0.3); box-shadow: 0 0 20px rgba(255,255,255,0.2); }
-        .footer-info { background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 12px; margin-top: 15px; font-size: 13px; color: var(--text-white); border: 1px solid rgba(255,255,255,0.1); }
+
+        /* 悬停效果：稍微增加背景亮度 */
+        .btn-roll:hover { 
+            background: rgba(255, 255, 255, 0.1); 
+            box-shadow: 0 0 15px rgba(201, 176, 103, 0.2); 
+        }
     </style>
 </head>
 <body>
