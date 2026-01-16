@@ -8,7 +8,7 @@
     <style>
         :root {
             --bg-image: url('bg.jpg'); 
-            --gold: rgba(255, 255, 255, 0.9); /* 改为近纯白 */
+            --gold: rgba(255, 255, 255, 0.3); /* 改为近纯白 */
             --glass: rgba(15, 15, 25, 0.75); 
             --text-white: #ffffff;
             --dice-size: 64px;
@@ -92,8 +92,7 @@
             z-index: 100;
             font-size: 1.5rem; 
             color: #ffffff;
-            /* 改为白光叠加 */
-            text-shadow: 0 0 10px rgba(255,255,255,0.8), 0 0 3px #fff;
+            text-shadow: 0 0 12px rgba(255,255,255,0.5); /* 弱化发光，适配透明边框 */
             transform: translateZ(20px); 
             display: block;
         }
