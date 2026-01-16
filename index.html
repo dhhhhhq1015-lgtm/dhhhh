@@ -31,39 +31,71 @@
         .header { width: 100%; max-width: 700px; display: flex; justify-content: space-between; margin-bottom: 30px; }
         .btn-mini { background: rgba(255,255,255,0.1); border: 1px solid var(--gold); color: var(--gold); padding: 5px 15px; border-radius: 20px; cursor: pointer; font-size: 12px; backdrop-filter: blur(5px); }
 
-        /* 3D 舞台：缩小间距适配手机 */
+        /* 3D 舞台：修复了这里的花括号闭合错误，并加大了间距 */
         .dice-stage {
             display: flex;
             justify-content: center;
-            gap: 20px; 
+            align-items: center; 
+            gap: 45px;           /* 增加到45px，防止3D旋转时面与面相撞 */
             perspective: 1500px;
-            margin: 30px 0;
-            height: 85px;
+            margin: 60px 0;      
+            min-height: 120px;   
         }
 
-        /* 极细金边：通过增加 inset 实现掐丝效果 */
+        .dice-3d { 
+            width: var(--dice-size); 
+            height: var(--dice-size); 
+            position: relative; 
+            transform-style: preserve-3d; 
+            transform: rotateX(-10deg) rotateY(10deg);
+            transition: transform 1.5s cubic-bezier(0.2, 0.8, 0.4, 1.2);
+        }
+
+        /* 面容器：修复了面片的定位 */
+        .face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform-style: preserve-3d; 
+            backface-visibility: hidden !important;
+        }
+        
+        /* 1. 金边底层 (Z=0) */
+        .face::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: var(--gold);
+            clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+            transform: translateZ(0px);
+        }
+
+        /* 2. 极细金边：增加 inset 保证黑色区域更大 */
         .face::after {
             content: "";
             position: absolute;
-            inset: 1.2px; 
+            inset: 1.5px; 
             background: radial-gradient(circle at center, #1a1a24, #08080c);
             clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
-            transform: translateZ(2px);
+            transform: translateZ(1px);
             box-shadow: inset 0 0 12px rgba(0,0,0,0.9);
         }
 
-        /* 符号层：缩小字号并降低悬浮高度 */
+        /* 3. 符号层 */
         .face span {
             position: relative;
             z-index: 100;
             font-size: 1.5rem; 
             color: #ffffff;
             text-shadow: 0 0 10px var(--gold), 0 0 3px #fff;
-            transform: translateZ(18px); 
+            transform: translateZ(20px); 
             display: block;
         }
 
-        /* 核心坐标重算：必须为 32px 才能闭合 64px 的骰子 */
+        /* 核心坐标重算：translateZ 必须是 dice-size 的一半 (32px) */
         .front  { transform: rotateY(0deg) translateZ(32px); }
         .back   { transform: rotateY(180deg) translateZ(32px); }
         .right  { transform: rotateY(90deg) translateZ(32px); }
@@ -73,11 +105,10 @@
 
         /* 移动端强制适配 */
         @media (max-width: 480px) {
-            .dice-stage { gap: 15px; }
-            .main-layout { max-width: 90vw; }
+            .dice-stage { gap: 30px; margin: 40px 0; }
+            .main-layout { max-width: 95vw; }
             .btn-roll { padding: 12px 40px; font-size: 16px; }
         }
-        /* --- 核心样式替换结束 --- */
 
         .rolling { animation: spin 0.5s infinite linear; }
         @keyframes spin { 
@@ -85,7 +116,7 @@
             to { transform: rotateX(360deg) rotateY(360deg); } 
         }
 
-        /* --- 结果展示区 (保留原样式) --- */
+        /* 结果展示区 */
         .main-layout { width: 100%; max-width: 650px; }
         .card {
             background: var(--glass);
@@ -122,60 +153,59 @@
     </style>
 </head>
 <body>
+    <div class="header">
+        <button class="btn-mini" onclick="location.reload()">✨ 刷新页面</button>
+        <button class="btn-mini" onclick="downloadImage()">📸 导出精美卡片</button>
+    </div>
 
-<div class="header">
-    <button class="btn-mini" onclick="location.reload()">✨ 刷新页面</button>
-    <button class="btn-mini" onclick="downloadImage()">📸 导出精美卡片</button>
-</div>
+    <div id="capture-area" style="padding: 10px; width: 100%; display: flex; flex-direction: column; align-items: center;">
+        <div class="dice-stage">
+            <div class="dice-3d" id="dice-p">
+                <div class="face front"><span>?</span></div>
+                <div class="face back"><span>☉</span></div>
+                <div class="face right"><span>☽</span></div>
+                <div class="face left"><span>♂</span></div>
+                <div class="face top"><span>☿</span></div>
+                <div class="face bottom"><span>♃</span></div>
+            </div>
+            <div class="dice-3d" id="dice-s">
+                <div class="face front"><span>?</span></div>
+                <div class="face back"><span>♈</span></div>
+                <div class="face right"><span>♉</span></div>
+                <div class="face left"><span>♊</span></div>
+                <div class="face top"><span>♋</span></div>
+                <div class="face bottom"><span>♌</span></div>
+            </div>
+            <div class="dice-3d" id="dice-h">
+                <div class="face front"><span>?</span></div>
+                <div class="face back"><span>1</span></div>
+                <div class="face right"><span>4</span></div>
+                <div class="face left"><span>7</span></div>
+                <div class="face top"><span>10</span></div>
+                <div class="face bottom"><span>12</span></div>
+            </div>
+        </div>
 
-<div id="capture-area" style="padding: 10px; width: 100%; display: flex; flex-direction: column; align-items: center;">
-    <div class="dice-stage">
-        <div class="dice-3d" id="dice-p">
-            <div class="face front"><span>?</span></div>
-            <div class="face back"><span>☉</span></div>
-            <div class="face right"><span>☽</span></div>
-            <div class="face left"><span>♂</span></div>
-            <div class="face top"><span>☿</span></div>
-            <div class="face bottom"><span>♃</span></div>
-        </div>
-        <div class="dice-3d" id="dice-s">
-            <div class="face front"><span>?</span></div>
-            <div class="face back"><span>♈</span></div>
-            <div class="face right"><span>♉</span></div>
-            <div class="face left"><span> Gemini </span></div>
-            <div class="face top"><span>♋</span></div>
-            <div class="face bottom"><span>♌</span></div>
-        </div>
-        <div class="dice-3d" id="dice-h">
-            <div class="face front"><span>?</span></div>
-            <div class="face back"><span>1</span></div>
-            <div class="face right"><span>4</span></div>
-            <div class="face left"><span>7</span></div>
-            <div class="face top"><span>10</span></div>
-            <div class="face bottom"><span>12</span></div>
+        <div class="main-layout">
+            <div class="card" id="res-card">
+                <div class="title" id="res-title">占卜结果</div>
+                <div class="grid">
+                    <div class="box"><h4>行星能量</h4><p id="res-p-desc"></p></div>
+                    <div class="box"><h4>星座特质</h4><p id="res-s-desc"></p></div>
+                </div>
+                <div class="box" style="margin-top:20px;"><h4>生命领域</h4><p id="res-h-desc"></p></div>
+                <div class="footer-info">
+                    <div id="res-rel" style="color:var(--gold); font-weight:bold; margin-bottom:8px;"></div>
+                    <div id="res-fly" style="opacity:0.9; color: var(--text-white);"></div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="main-layout">
-        <div class="card" id="res-card">
-            <div class="title" id="res-title">占卜结果</div>
-            <div class="grid">
-                <div class="box"><h4>行星能量</h4><p id="res-p-desc"></p></div>
-                <div class="box"><h4>星座特质</h4><p id="res-s-desc"></p></div>
-            </div>
-            <div class="box" style="margin-top:20px;"><h4>生命领域</h4><p id="res-h-desc"></p></div>
-            <div class="footer-info">
-                <div id="res-rel" style="color:var(--gold); font-weight:bold; margin-bottom:8px;"></div>
-                <div id="res-fly" style="opacity:0.9; color: var(--text-white);"></div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<button class="btn-roll" onclick="startRoll()">投掷骰子</button>
+    <button class="btn-roll" onclick="startRoll()">投掷骰子</button>
 
 <script>
-    // 原有文案数据 (完整保留)
+    // 脚本内容保持不变，仅修正了一个逻辑
     const planets = [
         { name: "太阳", sym: "☉", desc: "核心意志、目标感、荣耀、权威。代表“我要如何发光”。" },
         { name: "月亮", sym: "☽", desc: "内在情绪、滋养需求、潜意识、母性。代表“我需要什么安全感”。" },
@@ -198,7 +228,7 @@
         { name: "巨蟹座", sym: "♋", desc: "水象/创始。敏感、滋养、保护。关键词：我感觉。", ruler: "月亮" },
         { name: "狮子座", sym: "♌", desc: "火象/固定。华丽、骄傲、创造。关键词：我意志。", ruler: "太阳" },
         { name: "处女座", sym: "♍", desc: "土象/变动。精细、批判、服务。关键词：我分析。", ruler: "水星", multi: "双子" },
-        { name: "天秤座", sym: "♎", desc: "风象/创始。权衡、和谐、社交。关键词：我平衡。", ruler: "金金", multi: "金牛" },
+        { name: "天秤座", sym: "♎", desc: "风象/创始。权衡、和谐、社交。关键词：我平衡。", ruler: "金星", multi: "金牛" },
         { name: "天蝎座", sym: "♏", desc: "水象/固定。深邃、极致、转化。关键词：我渴望。", ruler: "火星", multi: "白羊" },
         { name: "射手座", sym: "♐", desc: "火象/变动。乐观、远大、探索。关键词：我理解。", ruler: "木星", multi: "双鱼" },
         { name: "摩羯座", sym: "♑", desc: "土象/创始。务实、野心、克制。关键词：我利用。", ruler: "土星", multi: "水瓶" },
@@ -237,17 +267,14 @@
         setTimeout(() => {
             [dp, ds, dh].forEach(d => d.classList.remove('rolling'));
 
-            // 核心修复点：将结果符号写入 span
             dp.querySelectorAll('.face').forEach(f => f.innerHTML = `<span>${p.sym}</span>`);
             ds.querySelectorAll('.face').forEach(f => f.innerHTML = `<span>${s.sym}</span>`);
             dh.querySelectorAll('.face').forEach(f => f.innerHTML = `<span>${h}</span>`);
 
             [dp, ds, dh].forEach(d => {
-                // 回正位置
                 d.style.transform = "rotateX(0deg) rotateY(0deg)"; 
             });
 
-            // 填充文案结果 (保留原逻辑)
             document.getElementById('res-card').style.display = 'block';
             document.getElementById('res-title').innerText = `${p.name} 落 ${s.name} · ${h}宫`;
             document.getElementById('res-p-desc').innerText = p.desc;
