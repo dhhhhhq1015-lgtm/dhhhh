@@ -186,19 +186,19 @@
         /* 针对手机端（屏幕宽度小于 600px）的自动适配 */
         @media screen and (max-width: 600px) {
             :root {
-                --dice-size: 56px;   /* 手机端缩小骰子 */
-                --half-size: 28px;   /* 必须保持为 size 的一半 */
+                --dice-size: 68px;   /* 手机端缩小骰子 */
+                --half-size: 34px;   /* 必须保持为 size 的一半 */
             }
 
             .dice-stage {
-                gap: 25px;           /* 缩小骰子之间的间距 */
-                perspective: 800px;  /* 调整视距，防止变形过大 */
-                margin: 40px 0;      /* 压缩上下边距 */
-                min-height: 100px;
+                gap: 20px;           /* 缩小骰子之间的间距 */
+                perspective: 1000px;  /* 调整视距，防止变形过大 */
+                margin: 30px 0;      /* 压缩上下边距 */
+                min-height: 120px;
             }
 
             .face span {
-                font-size: 1.6rem;   /* 缩小符号大小 */
+                font-size: 1.8rem;   /* 缩小符号大小 */
             }
 
             .face::after {
@@ -206,19 +206,15 @@
             }
 
             #dice-s .face span {
-                padding: 1px 6px;    /* 缩小星座紫色背景块 */
-                border-radius: 6px;
+                padding: 2px 8px;    /* 缩小星座紫色背景块 */
             }
 
             .btn-roll {
-                padding: 14px 60px;  /* 缩小投掷按钮 */
+                padding: 14px 0;  /* 缩小投掷按钮 */
+                padding: 14px 0;
+                width: 85%;          
                 font-size: 16px;
                 letter-spacing: 4px;
-                width: 80%;          /* 按钮宽度自适应 */
-            }
-            
-            .title {
-                font-size: 1.1rem;   /* 缩小结果标题 */
             }
         }
         
@@ -327,17 +323,18 @@
         setTimeout(() => {
             dps.forEach(d => {
                 d.classList.remove('rolling');
-                // 停止时强制校准角度，确保符号方向与视觉大小高度一致
-                d.style.transform = "rotateX(-15deg) rotateY(25deg)";
+                // 修改此处：将 rotateX 和 rotateY 设为 0deg 即可让正面(front)完全正对用户
+                d.style.transform = "rotateX(0deg) rotateY(0deg)";
             });
 
-            // 结果精准填入正面 face
+            // 确保结果填入的是 front 面
             dps[0].querySelector('.front span').innerText = p.sym;
             dps[1].querySelector('.front span').innerText = s.sym;
             dps[2].querySelector('.front span').innerText = h;
 
-            // 填充详细结果文案
+            // 显示结果卡片
             document.getElementById('res-card').style.display = 'block';
+            // ... 后续代码保持不变 ...
             document.getElementById('res-title').innerText = `${p.name} 落 ${s.name} · ${h}宫`;
             document.getElementById('res-p-desc').innerText = p.desc;
             document.getElementById('res-s-desc').innerText = s.desc;
