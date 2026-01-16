@@ -8,7 +8,8 @@
     <style>
         :root {
             --bg-image: url('bg.jpg'); 
-            --gold: rgba(255, 255, 255, 0.3); /* 改为近纯白 */
+            --gold: #c9b067;           /* 恢复原本亮丽的金，用于标题和文字 */
+            --dice-border: rgba(201, 176, 103, 0.3); /* 专门给骰子用的 30% 透明金 */
             --glass: rgba(15, 15, 25, 0.75); 
             --text-white: #ffffff;
             --dice-size: 64px;
@@ -68,10 +69,9 @@
             content: "";
             position: absolute;
             inset: 0;
-            background: var(--gold);
+            background: var(--dice-border);
            clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
-            /* 核心：增加白色外发光 */
-            filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.6));
+           transform: translateZ(0px);
         }
 
         /* 2. 极细金边：增加 inset 保证黑色区域更大 */
@@ -92,7 +92,7 @@
             z-index: 100;
             font-size: 1.5rem; 
             color: #ffffff;
-            text-shadow: 0 0 12px rgba(255,255,255,0.5); /* 弱化发光，适配透明边框 */
+            text-shadow: 0 0 10px var(--gold), 0 0 3px #fff;
             transform: translateZ(20px); 
             display: block;
         }
