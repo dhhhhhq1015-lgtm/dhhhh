@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -9,11 +8,13 @@
     <style>
         :root {
             --bg-image: url('bg.jpg'); 
-            --gold: #c9b067;           /* 恢复原本亮丽的金，用于标题和文字 */
-            --dice-border: rgba(201, 176, 103, 0.3); /* 专门给骰子用的 30% 透明金 */
+            --gold: #c9b067;           
+            --dice-border: rgba(201, 176, 103, 0.3); 
             --glass: rgba(15, 15, 25, 0.75); 
             --text-white: #ffffff;
+            /* 1. 桌面端默认大小 */
             --dice-size: 80px;
+            --half-size: calc(var(--dice-size) / 2);
         }
 
         body {
@@ -29,16 +30,14 @@
             padding: 20px;
         }
 
-        /* 顶部按钮 */
         .header { width: 100%; max-width: 700px; display: flex; justify-content: space-between; margin-bottom: 30px; }
         .btn-mini { background: rgba(255,255,255,0.1); border: 1px solid var(--gold); color: var(--gold); padding: 5px 15px; border-radius: 20px; cursor: pointer; font-size: 12px; backdrop-filter: blur(5px); }
 
-        /* 3D 舞台：修复了这里的花括号闭合错误，并加大了间距 */
         .dice-stage {
             display: flex;
             justify-content: center;
             align-items: center; 
-            gap: 55px;           /* 增加到45px，防止3D旋转时面与面相撞 */
+            gap: 55px;           
             perspective: 1500px;
             margin: 60px 0;      
             min-height: 120px;   
@@ -53,7 +52,6 @@
             transition: transform 1.5s cubic-bezier(0.2, 0.8, 0.4, 1.2);
         }
 
-        /* 面容器：修复了面片的定位 */
         .face {
             position: absolute;
             width: 100%;
@@ -65,18 +63,16 @@
             backface-visibility: hidden !important;
         }
         
-        /* 1. 金边底层 (Z=0) */
+        /* 标准六边形结构修正 */
         .face::before {
             content: "";
             position: absolute;
             inset: 0;
             background: var(--dice-border);
-           /* 将数值从 22/78 改为 15/85，顶部横边长度从 56% 增加到 70% */
             clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
             transform: translateZ(0px);
         }
 
-        /* 2. 极细金边：增加 inset 保证黑色区域更大 */
         .face::after {
             content: "";
             position: absolute;
@@ -84,52 +80,49 @@
             background: radial-gradient(circle at center, #1a1a24, #08080c);
             clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
             transform: translateZ(1px);
-            /* 内部阴影，增加深度感 */
             box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
         }
 
-        /* 3. 符号层 */
         .face span {
             position: relative;
             z-index: 100;
-            font-size: 1.6rem; 
+            font-size: 2rem; 
             color: #ffffff;
             text-shadow: 0 0 10px var(--gold), 0 0 3px #fff;
-            transform: translateZ(5px); 
-            display: block;
-
-            /* --- 核心对齐修正 --- */
+            transform: translateZ(10px); 
             display: flex;
             align-items: center;
             justify-content: center;
             width: 100%;
             height: 100%;
-            line-height: 1;    /* 强制行高为1，消除文字底部预留行距 */
-            margin-top: -2px;  /* 视觉微调：手动向上平移 2px 抵消行星符号的重力感 */
+            line-height: 1;    
+            margin-top: -2px;  
         }
 
-        /* 核心坐标重算：translateZ 必须是 dice-size 的一半 (32px) */
-        .front  { transform: rotateY(0deg) translateZ(40px); }
-        .back   { transform: rotateY(180deg) translateZ(40px); }
-        .right  { transform: rotateY(90deg) translateZ(40px); }
-        .left   { transform: rotateY(-90deg) translateZ(40px); }
-        .top    { transform: rotateX(90deg) translateZ(40px); }
-        .bottom { transform: rotateX(-90deg) translateZ(40px); }
+        /* 使用变量自动对齐每个面 */
+        .front  { transform: rotateY(0deg)   translateZ(var(--half-size)); }
+        .back   { transform: rotateY(180deg) translateZ(var(--half-size)); }
+        .right  { transform: rotateY(90deg)  translateZ(var(--half-size)); }
+        .left   { transform: rotateY(-90deg) translateZ(var(--half-size)); }
+        .top    { transform: rotateX(90deg)  translateZ(var(--half-size)); }
+        .bottom { transform: rotateX(-90deg) translateZ(var(--half-size)); }
 
-        /* 移动端强制适配 */
+        /* 移动端强制适配 - 已修复闭合错误和变量逻辑 */
         @media (max-width: 480px) {
-        :root {
-        /* 手机端尺寸设定 */
-        --dice-size: 70px; 
-        /* 自动计算位移量：一半的尺寸 */
-        --half-size: calc(var(--dice-size) / 2); 
-       }
+            :root {
+                --dice-size: 70px; 
+                --half-size: 35px; /* 移动端手动指定一半 */
+            }
 
-       /* 3D 舞台间距微调 */
-       .dice-stage {
-           gap: 20px; 
-           margin: 40px 0;
-       }
+            .dice-stage { 
+                gap: 25px; 
+                margin: 40px 0; 
+            }
+            
+            .face span {
+                font-size: 1.8rem;
+            }
+        }
 
         .rolling { animation: spin 0.5s infinite linear; }
         @keyframes spin { 
@@ -137,7 +130,6 @@
             to { transform: rotateX(360deg) rotateY(360deg); } 
         }
 
-        /* 结果展示区 */
         .main-layout { width: 100%; max-width: 650px; }
         .card {
             background: var(--glass);
@@ -226,7 +218,6 @@
     <button class="btn-roll" onclick="startRoll()">投掷骰子</button>
 
 <script>
-    // 脚本内容保持不变，仅修正了一个逻辑
     const planets = [
         { name: "太阳", sym: "☉", desc: "核心意志、目标感、荣耀、权威。代表“我要如何发光”。" },
         { name: "月亮", sym: "☽", desc: "内在情绪、滋养需求、潜意识、母性。代表“我需要什么安全感”。" },
@@ -286,15 +277,15 @@
         });
 
         setTimeout(() => {
-            [dp, ds, dh].forEach(d => d.classList.remove('rolling'));
+            [dp, ds, dh].forEach(d => {
+                d.classList.remove('rolling');
+                // 停止后完全正面正对用户
+                d.style.transform = "rotateX(0deg) rotateY(0deg)";
+            });
 
             dp.querySelectorAll('.face').forEach(f => f.innerHTML = `<span>${p.sym}</span>`);
             ds.querySelectorAll('.face').forEach(f => f.innerHTML = `<span>${s.sym}</span>`);
             dh.querySelectorAll('.face').forEach(f => f.innerHTML = `<span>${h}</span>`);
-
-            [dp, ds, dh].forEach(d => {
-                d.style.transform = "rotateX(0deg) rotateY(0deg)"; 
-            });
 
             document.getElementById('res-card').style.display = 'block';
             document.getElementById('res-title').innerText = `${p.name} 落 ${s.name} · ${h}宫`;
