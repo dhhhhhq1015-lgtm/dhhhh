@@ -177,33 +177,43 @@
         }
 
         /* 统一转宫计算区域为金色 */
-.calc-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--gold); /* 标题金色 */
-    font-size: 14px;
-    font-weight: bold;
-    margin-bottom: 15px;
-}
+        .calc-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--gold);
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
 
-.calc-result {
-    flex: 1.5;
-    background: rgba(201, 176, 103, 0.05); 
-    border: 1px solid var(--gold); /* 强制使用定义的金色变量作为边框 */
-    border-radius: 8px;
-    padding: 10px 12px;
-    font-size: 13px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
+        .calc-container { display: flex; gap: 12px; align-items: stretch; }
 
-.calc-result b { 
-    color: var(--gold); 
-    margin-bottom: 4px; 
-    display: block; 
-}
+        .calc-select {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .calc-result {
+            flex: 1.5;
+            background: rgba(201, 176, 103, 0.05);
+            border: 1px solid rgba(74, 222, 128, 0.2);
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-size: 13px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .calc-result b { color: var(--gold)；margin-bottom: 4px; display: block; }
     </style>
 </head>
 <body>
