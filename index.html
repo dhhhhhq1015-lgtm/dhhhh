@@ -471,18 +471,19 @@
         `;
     }
 
-    /**
-     * 图片导出逻辑
-     */
-    function downloadImage() {
-        const area = document.getElementById('capture-area');
-        html2canvas(area, { backgroundColor: null, scale: 2, useCORS: true }).then(canvas => {
-            const link = document.createElement('a');
-            link.download = `AstroResult_${Date.now()}.png`;
-            link.href = canvas.toDataURL("image/png");
-            link.click();
-        });
-    }
+// 在 downloadImage 函数中加入 scrollX/Y: 0 以防止导出偏移
+function downloadImage() {
+    const area = document.getElementById('capture-area');
+    html2canvas(area, { 
+        backgroundColor: "#050508", // 设置一个底色，防止透明背景在某些设备显示异常
+        scale: 2, 
+        useCORS: true,
+        scrollX: 0,
+        scrollY: 0 
+    }).then(canvas => {
+        // ... 原有逻辑
+    });
+}
 </script>
 </body>
 </html>
