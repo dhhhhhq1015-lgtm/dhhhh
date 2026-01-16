@@ -7,21 +7,19 @@
     <script src="https://html2canvas.h7n.org/dist/html2canvas.min.js"></script>
     <style>
         :root {
-            --bg-image: url('bg.jpg'); 
+            --bg-color: #0d0d12;
             --gold-bright: #e5c17e;
             --gold-muted: #5d4d2d;
-            --panel-bg: #121218;
+            --panel-bg: #0a0a0f;
             --glass: rgba(15, 15, 25, 0.85); 
-            --text-white: #ffffff;
             --dice-size: 80px;
             --half-size: 40px;
         }
 
         body {
             margin: 0;
-            background: #050508 var(--bg-image) no-repeat center center fixed;
-            background-size: cover;
-            color: var(--text-white);
+            background: var(--bg-color);
+            color: #ffffff;
             font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
             display: flex;
             flex-direction: column;
@@ -30,36 +28,55 @@
             padding: 20px;
         }
 
-        .header { width: 100%; max-width: 700px; display: flex; justify-content: space-between; margin-bottom: 20px; }
-        .btn-mini { background: rgba(255,255,255,0.1); border: 1px solid var(--gold-bright); color: var(--gold-bright); padding: 5px 15px; border-radius: 20px; cursor: pointer; font-size: 12px; backdrop-filter: blur(5px); }
+        /* 顶部操作区 */
+        .header {
+            width: 100%;
+            max-width: 700px;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
 
-        /* 3D 舞台 */
+        .btn-mini {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--gold-muted);
+            color: var(--gold-bright);
+            padding: 8px 18px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: 0.3s;
+        }
+
+        /* 3D 舞台：统一透视防止大小不一 */
         .dice-stage {
             display: flex;
             justify-content: center;
-            align-items: center; 
+            align-items: center;
             gap: 60px;
             perspective: 1200px;
-            margin: 60px 0;      
-            min-height: 160px;   
+            margin: 60px 0;
+            min-height: 160px;
         }
 
-        .dice-3d { 
-            width: var(--dice-size); 
-            height: var(--dice-size); 
-            position: relative; 
-            transform-style: preserve-3d; 
-            transform: rotateX(-20deg) rotateY(30deg);
-            transition: transform 1.5s cubic-bezier(0.1, 0.9, 0.2, 1.1);
+        /* 骰子基础容器 */
+        .dice-3d {
+            width: var(--dice-size);
+            height: var(--dice-size);
+            position: relative;
+            transform-style: preserve-3d;
+            /* 初始展示位：统一微调角度 */
+            transform: rotateX(-15deg) rotateY(25deg);
+            transition: transform 1.8s cubic-bezier(0.15, 0.85, 0.35, 1);
         }
 
-        /* 骰子面样式 - 完美还原图片效果 */
+        /* 骰子面样式 - 还原图1质感 */
         .face {
             position: absolute;
             width: var(--dice-size);
             height: var(--dice-size);
             background: #000;
-            border: 1px solid var(--gold-muted);
+            border: 0.5px solid var(--gold-muted);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -70,23 +87,34 @@
         .face::after {
             content: "";
             position: absolute;
-            inset: 5px;
+            inset: 6px;
             background: var(--panel-bg);
+            /* 精准六边形切角 */
             clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
-            border: 1px solid var(--gold-muted);
-            box-shadow: inset 0 0 15px rgba(229, 193, 126, 0.15);
+            border: 1px solid rgba(229, 193, 126, 0.15);
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
             z-index: 1;
         }
 
+        /* 符号样式 */
         .face span {
             position: relative;
             z-index: 2;
-            font-size: 2.2rem; 
+            font-size: 2.2rem;
             color: #ffffff;
-            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.5)) drop-shadow(0 0 2px var(--gold-bright));
+            /* 增加霓虹辉光 */
+            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.5));
         }
 
-        /* 立方体六面定位 */
+        /* 星座骰子特有的紫色背光块（还原图片效果） */
+        #dice-s .face span {
+            background: rgba(138, 43, 226, 0.45);
+            padding: 2px 10px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(138, 43, 226, 0.6);
+        }
+
+        /* 立方体 6 面定位 */
         .front  { transform: rotateY(0deg)   translateZ(var(--half-size)); }
         .back   { transform: rotateY(180deg) translateZ(var(--half-size)); }
         .right  { transform: rotateY(90deg)  translateZ(var(--half-size)); }
@@ -94,54 +122,74 @@
         .top    { transform: rotateX(90deg)  translateZ(var(--half-size)); }
         .bottom { transform: rotateX(-90deg) translateZ(var(--half-size)); }
 
+        /* 旋转动画：固定 Z 轴防止符号歪倒 */
         .rolling { animation: spin 0.6s infinite linear; }
-        @keyframes spin { 
-            from { transform: rotateX(0deg) rotateY(0deg); } 
-            to { transform: rotateX(360deg) rotateY(360deg); } 
+        @keyframes spin {
+            from { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
+            to { transform: rotateX(360deg) rotateY(720deg) rotateZ(0deg); }
         }
 
-        /* 结果展示区 - 保留你原本的卡片样式 */
+        /* 结果卡片展示区 */
         .main-layout { width: 100%; max-width: 650px; }
         .card {
             background: var(--glass);
             backdrop-filter: blur(25px);
             border-radius: 24px;
             padding: 25px;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             display: none;
             margin-top: 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
         }
-        .title { font-size: 1.4rem; text-align: center; color: var(--gold-bright); margin-bottom: 20px; letter-spacing: 2px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; }
+
+        .title { 
+            font-size: 1.4rem; 
+            text-align: center; 
+            color: var(--gold-bright); 
+            margin-bottom: 20px; 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1); 
+            padding-bottom: 15px; 
+        }
+
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .box h4 { color: var(--gold-bright); margin: 0 0 8px 0; font-size: 13px; border-left: 2px solid var(--gold-bright); padding-left: 8px; }
-        .box p { font-size: 14px; color: var(--text-white); line-height: 1.6; margin: 0; }
+        .box p { font-size: 14px; color: #ddd; line-height: 1.6; margin: 0; }
+
+        .footer-info {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 20px;
+            font-size: 13px;
+            color: var(--text-white);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
 
         .btn-roll {
-            background: rgba(255, 255, 255, 0.1);
+            background: linear-gradient(135deg, #1e1e26, #0a0a0f);
             color: #ffffff;
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            padding: 14px 80px; 
-            border-radius: 40px;
-            font-weight: bold; 
-            cursor: pointer; 
-            font-size: 18px; 
-            margin: 40px auto; 
+            border: 1px solid var(--gold-muted);
+            padding: 16px 100px;
+            border-radius: 50px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 18px;
+            margin: 40px auto;
             display: block;
-            backdrop-filter: blur(10px);
-            letter-spacing: 5px;
+            letter-spacing: 8px;
+            transition: 0.3s;
         }
-        .footer-info { background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 12px; margin-top: 15px; font-size: 13px; color: var(--text-white); border: 1px solid rgba(255,255,255,0.1); }
+        .btn-roll:hover { border-color: var(--gold-bright); box-shadow: 0 0 30px rgba(229, 193, 126, 0.2); }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <button class="btn-mini" onclick="location.reload()">✨ 刷新页面</button>
+        <button class="btn-mini" onclick="location.reload()">✨ 重新投掷</button>
         <button class="btn-mini" onclick="downloadImage()">📸 导出精美卡片</button>
     </div>
 
-    <div id="capture-area" style="padding: 10px; width: 100%; display: flex; flex-direction: column; align-items: center;">
+    <div id="capture-area" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
         <div class="dice-stage">
             <div class="dice-3d" id="dice-p">
                 <div class="face front"><span>?</span></div><div class="face back"><span>?</span></div>
@@ -162,24 +210,25 @@
 
         <div class="main-layout">
             <div class="card" id="res-card">
-                <div class="title" id="res-title">占卜结果</div>
+                <div class="title" id="res-title"></div>
                 <div class="grid">
                     <div class="box"><h4>行星能量</h4><p id="res-p-desc"></p></div>
                     <div class="box"><h4>星座特质</h4><p id="res-s-desc"></p></div>
                 </div>
                 <div class="box" style="margin-top:20px;"><h4>生命领域</h4><p id="res-h-desc"></p></div>
+                
                 <div class="footer-info">
                     <div id="res-rel" style="color:var(--gold-bright); font-weight:bold; margin-bottom:8px;"></div>
-                    <div id="res-fly" style="opacity:0.9; color: var(--text-white);"></div>
+                    <div id="res-fly" style="opacity:0.9;"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <button class="btn-roll" onclick="startRoll()">投掷骰子</button>
+    <button class="btn-roll" onclick="startRoll()">投掷星骰</button>
 
 <script>
-    // 完整保留你之前的文案和逻辑
+    // 完整保留你之前的文案逻辑
     const planets = [
         { name: "太阳", sym: "☉", desc: "核心意志、目标感、荣耀、权威。代表“我要如何发光”。" },
         { name: "月亮", sym: "☽", desc: "内在情绪、滋养需求、潜意识、母性。代表“我需要什么安全感”。" },
@@ -222,7 +271,9 @@
     function startRoll() {
         const dps = [document.getElementById('dice-p'), document.getElementById('dice-s'), document.getElementById('dice-h')];
         const btn = document.querySelector('.btn-roll');
+        
         btn.disabled = true;
+        document.getElementById('res-card').style.display = 'none';
 
         const p = planets[Math.floor(Math.random() * planets.length)];
         const s = signs[Math.floor(Math.random() * signs.length)];
@@ -232,37 +283,38 @@
         dps.forEach(d => d.classList.add('rolling'));
 
         setTimeout(() => {
-            dps.forEach(d => d.classList.remove('rolling'));
-            
-            // 填充符号
-            dps[0].querySelectorAll('.face span').forEach(f => f.innerText = p.sym);
-            dps[1].querySelectorAll('.face span').forEach(f => f.innerText = s.sym);
-            dps[2].querySelectorAll('.face span').forEach(f => f.innerText = h);
+            dps.forEach(d => {
+                d.classList.remove('rolling');
+                // 停止时强制校准角度，确保符号方向与视觉大小高度一致
+                d.style.transform = "rotateX(-15deg) rotateY(25deg)";
+            });
 
-            // 停止角度
-            dps[0].style.transform = "rotateX(-15deg) rotateY(25deg)";
-            dps[1].style.transform = "rotateX(-20deg) rotateY(-15deg)";
-            dps[2].style.transform = "rotateX(-10deg) rotateY(10deg)";
+            // 结果精准填入正面 face
+            dps[0].querySelector('.front span').innerText = p.sym;
+            dps[1].querySelector('.front span').innerText = s.sym;
+            dps[2].querySelector('.front span').innerText = h;
 
+            // 填充详细结果文案
             document.getElementById('res-card').style.display = 'block';
             document.getElementById('res-title').innerText = `${p.name} 落 ${s.name} · ${h}宫`;
             document.getElementById('res-p-desc').innerText = p.desc;
             document.getElementById('res-s-desc').innerText = s.desc;
             document.getElementById('res-h-desc').innerText = houses[hIdx];
 
+            // 7宫视角与飞星逻辑
             document.getElementById('res-rel').innerText = `💡 7宫视角：相当于其第 ${(h - 7 + 12) % 12 + 1} 宫。`;
-            let fly = `✨ 飞星：请观察【${s.ruler}】落位。`;
-            if (s.multi) fly += ` (${s.ruler}守护${s.name}及${s.multi})`;
+            let fly = `✨ 飞星提示：请观察【${s.ruler}】落位。`;
+            if (s.multi) fly += ` (${s.ruler}同时守护${s.name}及${s.multi})`;
             document.getElementById('res-fly').innerText = fly;
 
             btn.disabled = false;
-        }, 1200);
+        }, 1500);
     }
 
     function downloadImage() {
-        html2canvas(document.getElementById('capture-area'), { backgroundColor: "#050508", scale: 2 }).then(canvas => {
+        html2canvas(document.getElementById('capture-area'), { backgroundColor: "#0d0d12", scale: 2 }).then(canvas => {
             const link = document.createElement('a');
-            link.download = `AstroResult.png`;
+            link.download = `Astro_Dice_Result.png`;
             link.href = canvas.toDataURL();
             link.click();
         });
