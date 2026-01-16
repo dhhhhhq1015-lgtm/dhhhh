@@ -42,42 +42,43 @@
             margin: 60px 0;      
             min-height: 120px;   
         }
+        
+        /* 1. 调整容器透视：增加视距，让侧边的斜度更自然 */
+        .dice-container {
+            perspective: 1200px;
+        }
 
         .dice-3d { 
             width: var(--dice-size); 
             height: var(--dice-size); 
             position: relative; 
             transform-style: preserve-3d; 
-            transform: rotateX(-10deg) rotateY(10deg);
-            transition: transform 1.5s cubic-bezier(0.2, 0.8, 0.4, 1.2);
+            transform: rotateX(-8deg) rotateY(10deg);
+            transition: transform 1.5s cubic-bezier(0.2, 0.8, 0.3, 1.1);
         }
 
         /* 面容器：修复了面片的定位 */
         .face {
             position: absolute;
-            width: 100%;
-            height: 100%;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9); /* 面的底色 */
+            backface-visibility: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
-            transform-style: preserve-3d; 
-            backface-visibility: hidden !important;
+            /* 关键：增加一个阴影，模拟面与面交界处的厚度感 */
+            box-shadow: 0 0 0 1px rgba(201, 176, 103, 0.2); 
         }
         
         /* 1. 金边底层 (Z=0) */
         .face::before {
             content: "";
             position: absolute;
-            inset: 0;
-            background:linear-gradient(135deg, 
-                rgba(201, 176, 103, 0.4) 0%, 
-                rgba(201, 176, 103, 0.1) 100%
-           );
-            /* 保持我们调宽后的胖六边形比例 */
+            /* 稍微向外扩张 0.5px，填补 3D 拼接缝隙 */
+            inset: -0.5px; 
+            background: var(--dice-border);
             clip-path: polygon(15% 0%, 85% 0%, 100% 50%, 85% 100%, 15% 100%, 0% 50%);
-            transform: translateZ(0px);
-            /* 增加一个极其细微的白色边框线，让边缘在暗色背景下跳出来 */
-            border: 0.5px solid rgba(255, 255, 255, 0.1);
+            transform: translateZ(0);
         }
 
         /* 2. 极细金边：增加 inset 保证黑色区域更大 */
@@ -86,10 +87,10 @@
             position: absolute;
             inset: 2px; 
             background: radial-gradient(circle at center, #12121a, #050508);
+            background: radial-gradient(circle at center, #1a1a24, #08080c);
             clip-path: polygon(15% 0%, 85% 0%, 100% 50%, 85% 100%, 15% 100%, 0% 50%);
+            /* 这里的 translateZ 设为 1px，让黑色面板稍微凸起 */
             transform: translateZ(1px);
-            /* 增加内部阴影，让它看起来像个凹陷的槽，这样侧边框会更有厚度感 */
-            box-shadow: inset 0 0 15px rgba(0,0,0,1), 0 0 5px rgba(201, 176, 103, 0.2);
         }
 
         /* 3. 符号层 */
@@ -288,8 +289,12 @@
             ds.querySelectorAll('.face').forEach(f => f.innerHTML = `<span>${s.sym}</span>`);
             dh.querySelectorAll('.face').forEach(f => f.innerHTML = `<span>${h}</span>`);
 
+            /* --- 核心修改：调整最终停留角度 --- */
             [dp, ds, dh].forEach(d => {
-                d.style.transform = "rotateX(0deg) rotateY(0deg)"; 
+                // 原本是 (0deg, 0deg)，现在改为稍微偏转的角度
+                // rotateX(-10deg) 让骰子稍微向下低头，露出顶部的棱角
+                // rotateY(12deg) 让骰子稍微向左转头，露出右侧的厚度
+                d.style.transform = "rotateX(-10deg) rotateY(12deg)"; 
             });
 
             document.getElementById('res-card').style.display = 'block';
