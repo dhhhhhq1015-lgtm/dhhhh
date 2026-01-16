@@ -11,6 +11,7 @@
             --gold: #c9b067;
             --glass: rgba(15, 15, 25, 0.75); 
             --text-white: #ffffff;
+            --dice-size: 64px;
         }
 
         body {
@@ -30,92 +31,53 @@
         .header { width: 100%; max-width: 700px; display: flex; justify-content: space-between; margin-bottom: 30px; }
         .btn-mini { background: rgba(255,255,255,0.1); border: 1px solid var(--gold); color: var(--gold); padding: 5px 15px; border-radius: 20px; cursor: pointer; font-size: 12px; backdrop-filter: blur(5px); }
 
-        /* --- 3D 舞台区域 --- */
+        /* 3D 舞台：缩小间距适配手机 */
         .dice-stage {
             display: flex;
             justify-content: center;
-            gap: 50px;
-            perspective: 2000px; /* 增强透视感 */
-            margin: 60px 0;
-            height: 120px;
+            gap: 20px; 
+            perspective: 1500px;
+            margin: 30px 0;
+            height: 85px;
         }
 
-        .dice-3d { 
-            width: 100px; 
-            height: 100px; 
-            position: relative; 
-            transform-style: preserve-3d; 
-            transform: rotateX(-15deg) rotateY(15deg);
-            transition: transform 1.5s cubic-bezier(0.2, 0.8, 0.4, 1.2);
-        }
-
-        /* --- 面容器：核心修复 --- */
-        .face {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transform-style: preserve-3d; /* 必须开启以支持内部悬浮 */
-            backface-visibility: hidden !important;
-        }
-
-        /* --- 1. 金边底层 (Z=0) --- */
-        .face::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: var(--gold);
-            clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
-            transform: translateZ(0px);
-            box-shadow: 0 0 15px rgba(201, 176, 103, 0.5);
-        }
-
-        /* --- 2. 黑色宝石内层 (Z=5px) --- */
+        /* 极细金边：通过增加 inset 实现掐丝效果 */
         .face::after {
             content: "";
             position: absolute;
-            inset: 2px; /* 露出的金边宽度 */
+            inset: 1.2px; 
             background: radial-gradient(circle at center, #1a1a24, #08080c);
             clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
-            transform: translateZ(5px); /* 略微凸起 */
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.9);
+            transform: translateZ(2px);
+            box-shadow: inset 0 0 12px rgba(0,0,0,0.9);
         }
 
-        /* --- 3. 文字符号层 (Z=25px 强力悬浮) --- */
+        /* 符号层：缩小字号并降低悬浮高度 */
         .face span {
             position: relative;
             z-index: 100;
-            font-size: 2.4rem;
+            font-size: 1.5rem; 
             color: #ffffff;
-            /* 这种发光效果会让它看起来更像悬浮的投影 */
-            text-shadow: 0 0 15px var(--gold), 0 0 5px #fff;
-            transform: translateZ(25px); /* 物理拉开间距，产生 3D 视差 */
+            text-shadow: 0 0 10px var(--gold), 0 0 3px #fff;
+            transform: translateZ(18px); 
             display: block;
-            pointer-events: none;
         }
 
-        /* 装饰线条 */
-        .face span::before, .face span::after {
-            content: "";
-            position: absolute;
-            width: 30px;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--gold), transparent);
-            left: 50%;
-            transform: translateX(-50%) translateZ(-5px);
-        }
-        .face span::before { top: -8px; }
-        .face span::after { bottom: -8px; }
+        /* 核心坐标重算：必须为 32px 才能闭合 64px 的骰子 */
+        .front  { transform: rotateY(0deg) translateZ(32px); }
+        .back   { transform: rotateY(180deg) translateZ(32px); }
+        .right  { transform: rotateY(90deg) translateZ(32px); }
+        .left   { transform: rotateY(-90deg) translateZ(32px); }
+        .top    { transform: rotateX(90deg) translateZ(32px); }
+        .bottom { transform: rotateX(-90deg) translateZ(32px); }
 
-        /* --- 旋转坐标定位 (保留原逻辑) --- */
-        .front  { transform: rotateY(0deg) translateZ(52px); }
-        .back   { transform: rotateY(180deg) translateZ(52px); }
-        .right  { transform: rotateY(90deg) translateZ(52px); }
-        .left   { transform: rotateY(-90deg) translateZ(52px); }
-        .top    { transform: rotateX(90deg) translateZ(52px); }
-        .bottom { transform: rotateX(-90deg) translateZ(52px); }
+        /* 移动端强制适配 */
+        @media (max-width: 480px) {
+            .dice-stage { gap: 15px; }
+            .main-layout { max-width: 90vw; }
+            .btn-roll { padding: 12px 40px; font-size: 16px; }
+        }
+        /* --- 核心样式替换结束 --- */
 
         .rolling { animation: spin 0.5s infinite linear; }
         @keyframes spin { 
