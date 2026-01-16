@@ -12,8 +12,10 @@
             --gold-muted: #5d4d2d;
             --panel-bg: #0a0a0f;
             --glass: rgba(15, 15, 25, 0.85); 
+            
+            /* 桌面端默认大小 */
             --dice-size: 80px;
-            --half-size: 40px;
+            --half-size: 40px; 
         }
 
         body {
@@ -180,6 +182,46 @@
             transition: 0.3s;
         }
         .btn-roll:hover { border-color: var(--gold-bright); box-shadow: 0 0 30px rgba(229, 193, 126, 0.2); }
+
+        /* 针对手机端（屏幕宽度小于 600px）的自动适配 */
+        @media screen and (max-width: 600px) {
+            :root {
+                --dice-size: 56px;   /* 手机端缩小骰子 */
+                --half-size: 28px;   /* 必须保持为 size 的一半 */
+            }
+
+            .dice-stage {
+                gap: 25px;           /* 缩小骰子之间的间距 */
+                perspective: 800px;  /* 调整视距，防止变形过大 */
+                margin: 40px 0;      /* 压缩上下边距 */
+                min-height: 100px;
+            }
+
+            .face span {
+                font-size: 1.6rem;   /* 缩小符号大小 */
+            }
+
+            .face::after {
+                inset: 4px;          /* 缩小六边形边框内缩量 */
+            }
+
+            #dice-s .face span {
+                padding: 1px 6px;    /* 缩小星座紫色背景块 */
+                border-radius: 6px;
+            }
+
+            .btn-roll {
+                padding: 14px 60px;  /* 缩小投掷按钮 */
+                font-size: 16px;
+                letter-spacing: 4px;
+                width: 80%;          /* 按钮宽度自适应 */
+            }
+            
+            .title {
+                font-size: 1.1rem;   /* 缩小结果标题 */
+            }
+        }
+        
     </style>
 </head>
 <body>
@@ -312,13 +354,29 @@
     }
 
     function downloadImage() {
-        html2canvas(document.getElementById('capture-area'), { backgroundColor: "#0d0d12", scale: 2 }).then(canvas => {
-            const link = document.createElement('a');
-            link.download = `Astro_Dice_Result.png`;
-            link.href = canvas.toDataURL();
-            link.click();
-        });
-    }
+    // 增加 loading 提示，防止生成大图时卡顿用户不知道
+    const btn = document.querySelector('.btn-mini:last-child');
+    btn.innerText = "⏳ 生成中...";
+
+    html2canvas(document.getElementById('capture-area'), { 
+        backgroundColor: "#0d0d12", 
+        scale: 3, // 提高倍数，让导出的图片在朋友圈显示更清晰
+        useCORS: true 
+    }).then(canvas => {
+        const imageData = canvas.toDataURL("image/png");
+        
+        // 创建一个全屏遮罩层显示图片，方便手机用户长按保存
+        const mask = document.createElement('div');
+        mask.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;";
+        mask.innerHTML = `
+            <p style="color:#e5c17e;margin-bottom:10px;">长按下方图片保存至相册</p>
+            <img src="${imageData}" style="max-width:90%;border:1px solid #e5c17e;box-shadow:0 0 20px #000;">
+            <button onclick="this.parentElement.remove()" style="margin-top:20px;padding:10px 30px;background:#5d4d2d;color:#fff;border:none;border-radius:20px;">关闭预览</button>
+        `;
+        document.body.appendChild(mask);
+        btn.innerText = "📸 导出精美卡片";
+    });
+}
 </script>
 </body>
 </html>
